@@ -1,0 +1,238 @@
+<!doctype html>
+<html><head>
+  <meta charset="utf-8" />
+  <title>Leaderboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#ffffff; --text:#101828; --muted:#475467;
+      --border:#e4e7ec; --accent:#2563eb; --accent2:#1d4ed8;
+      --good:#067647; --bad:#b42318; --radius:14px;
+    }
+    body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text); background: linear-gradient(180deg, #f6f7fb, #eef2ff); padding:24px 18px; }
+    .wrap{max-width:1150px; margin:0 auto;}
+    h1{margin:0; font-size:26px; letter-spacing:-0.02em;}
+    a{color:var(--accent); text-decoration:none; font-weight:950;}
+    a:hover{text-decoration:underline;}
+    .card{ background: var(--card); border-radius: var(--radius); padding: 18px; border: 1px solid var(--border); margin: 12px 0; }
+    table{width:100%; border-collapse:collapse;}
+    th, td{padding:10px 6px; border-bottom: 1px solid var(--border); text-align:left; font-size:14px;}
+    .muted{color:var(--muted);}
+    img{max-width:420px; border-radius:12px; border:1px solid var(--border);}
+    code{background: #f2f4f7; padding: 2px 6px; border-radius: 8px; border: 1px solid var(--border);}
+    .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap; justify-content:space-between;}
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background: var(--accent);
+      color:white;
+      font-weight:900;
+    }
+    .btn:hover{background: var(--accent2); text-decoration:none;}
+    .btn-ghost{ background:white; color:var(--text); }
+    .btn-ghost:hover{background:#f2f4f7;}
+  </style>
+</head><body>
+  <div class="wrap">
+    <div class="row">
+      <h1>Leaderboard</h1>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        {% if back_round_id %}
+          <a class="btn btn-ghost" href="{{url_for('play_round', round_id=back_round_id)}}">Back to round</a>
+        {% endif %}
+        <a class="btn btn-ghost" href="{{url_for('host')}}">Back to host</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Total scores</h3>
+      {% if not ranked %}
+        <p class="muted">No players.</p>
+      {% else %}
+        <table>
+          <tr><th>Rank</th><th>Player</th><th>Total</th></tr>
+          {% for (p, s) in ranked %}
+            <tr><td>{{loop.index}}</td><td>{{p}}</td><td>{{s}}</td></tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+      <p class="muted" style="margin:10px 0 0 0;">Scoring is normalized by map size</p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px 0;">Round breakdown</h3>
+      {% if not rounds %}
+        <p class="muted">No rounds scored yet (did you set answers and submit guesses?).</p>
+      {% else %}
+        {% for rd in rounds %}
+          <h4 style="margin:10px 0 8px 0;">Round {{rd.index}} — <code>{{rd.map}}</code></h4>
+          <div class="pinwrap" data-round="{{rd.index}}" data-answer-x="{{rd.answer[0]}}" data-answer-y="{{rd.answer[1]}}" style="position:relative; display:inline-block; max-width:420px;">
+            <img class="pinmap" src="{{url_for('uploads', filename=rd.map)}}" />
+            <svg class="pinsvg" style="position:absolute; inset:0; width:100%; height:100%;"></svg>
+            <div class="pintooltip" style="position:absolute; display:none; z-index:5; padding:6px 8px; border-radius:10px; background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: 12px; font-weight: 950; box-shadow: 0 6px 20px rgba(16,24,40,0.12); pointer-events:none;"></div>
+          </div>
+          <script type="application/json" class="pindata" data-round="{{rd.index}}">{{ rd.guesses | tojson }}</script>
+          <table style="margin-top:10px;">
+            <tr>
+              <th>Player</th><th>Score</th><th>Distance (px)</th>
+            </tr>
+            {% for p in players %}
+              {% set v = rd.scores[p] %}
+              <tr>
+                <td>{{p}}</td>
+                {% if v %}
+                  <td>{{v[0]}}</td>
+                  <td>{{v[1]}}</td>
+                {% else %}
+                  <td class="muted">—</td>
+                  <td class="muted">no guess</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </table>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+<script>
+(function(){
+  function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+  function makePin(svg, cx, cy, color, label){
+    const ns = "http://www.w3.org/2000/svg";
+    const g = document.createElementNS(ns, "g");
+    g.classList.add("pin");
+    g.dataset.label = label;
+    g.style.cursor = "default";
+
+    // tail
+    const tail = document.createElementNS(ns, "path");
+    tail.setAttribute("d", `M ${cx} ${cy+11} L ${cx-6} ${cy+25} L ${cx+6} ${cy+25} Z`);
+    tail.setAttribute("fill", color);
+    tail.setAttribute("stroke", "rgba(16,24,40,0.18)");
+    tail.setAttribute("stroke-width", "2");
+
+    // outer ring
+    const outer = document.createElementNS(ns, "circle");
+    outer.setAttribute("cx", cx);
+    outer.setAttribute("cy", cy);
+    outer.setAttribute("r", "11");
+    outer.setAttribute("fill", "rgba(255,255,255,0.98)");
+    outer.setAttribute("stroke", "rgba(16,24,40,0.18)");
+    outer.setAttribute("stroke-width", "2");
+
+    const inner = document.createElementNS(ns, "circle");
+    inner.setAttribute("cx", cx);
+    inner.setAttribute("cy", cy);
+    inner.setAttribute("r", "4");
+    inner.setAttribute("fill", color);
+    inner.setAttribute("stroke", "rgba(16,24,40,0.18)");
+    inner.setAttribute("stroke-width", "1");
+
+    // Native browser tooltip (fallback)
+    const title = document.createElementNS(ns, "title");
+    title.textContent = label;
+
+    g.appendChild(title);
+    g.appendChild(tail);
+    g.appendChild(outer);
+    g.appendChild(inner);
+    svg.appendChild(g);
+    return g;
+  }
+
+  function parseRoundGuesses(roundIndex){
+    const script = document.querySelector(`script.pindata[data-round="${roundIndex}"]`);
+    if(!script) return {};
+    try { return JSON.parse(script.textContent || "{}"); } catch { return {}; }
+  }
+
+  function layoutOne(wrap){
+    const img = wrap.querySelector("img.pinmap");
+    const svg = wrap.querySelector("svg.pinsvg");
+    const tooltip = wrap.querySelector(".pintooltip");
+    if(!img || !svg) return;
+    if(!img.naturalWidth || !img.naturalHeight) return;
+
+    // size svg to image displayed size
+    const rect = img.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+    svg.setAttribute("width", w);
+    svg.setAttribute("height", h);
+    svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+
+    // clear old pins
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+    const roundIndex = wrap.dataset.round;
+    const guesses = parseRoundGuesses(roundIndex);
+
+    const scaleX = w / img.naturalWidth;
+    const scaleY = h / img.naturalHeight;
+
+    // player pins (blue)
+    for(const [name, pt] of Object.entries(guesses)){
+      if(!pt) continue;
+      const cx = clamp(Math.round(pt.x * scaleX), 0, w);
+      const cy = clamp(Math.round(pt.y * scaleY), 0, h);
+      makePin(svg, cx, cy, "rgba(37,99,235,0.98)", name);
+    }
+
+    // answer pin (red)
+    const ax = Number(wrap.dataset.answerX);
+    const ay = Number(wrap.dataset.answerY);
+    if(Number.isFinite(ax) && Number.isFinite(ay)){
+      const cx = clamp(Math.round(ax * scaleX), 0, w);
+      const cy = clamp(Math.round(ay * scaleY), 0, h);
+      makePin(svg, cx, cy, "rgba(220,38,38,0.98)", "Answer");
+    }
+
+    // Hover label (custom tooltip)
+    if(tooltip){
+      const show = (e, label) => {
+        tooltip.textContent = label;
+        tooltip.style.display = "block";
+        const pad = 10;
+        const x = clamp(e.offsetX + 12, pad, w - tooltip.offsetWidth - pad);
+        const y = clamp(e.offsetY + 12, pad, h - tooltip.offsetHeight - pad);
+        tooltip.style.left = x + "px";
+        tooltip.style.top = y + "px";
+      };
+      const hide = () => { tooltip.style.display = "none"; };
+
+      svg.onmousemove = (e) => {
+        const pin = e.target && e.target.closest ? e.target.closest(".pin") : null;
+        if(pin && pin.dataset && pin.dataset.label){
+          show(e, pin.dataset.label);
+        }else{
+          hide();
+        }
+      };
+      svg.onmouseleave = hide;
+    }
+  }
+
+  function layoutAll(){
+    document.querySelectorAll(".pinwrap").forEach(layoutOne);
+  }
+
+  window.addEventListener("resize", () => layoutAll());
+  document.addEventListener("DOMContentLoaded", () => {
+    // wait a tick for images to size
+    setTimeout(() => layoutAll(), 0);
+    // also layout after each image loads
+    document.querySelectorAll(".pinwrap img.pinmap").forEach(img => {
+      img.addEventListener("load", () => layoutAll());
+    });
+  });
+})();
+</script>
+
+  </div>
+</body></html>
