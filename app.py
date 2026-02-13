@@ -241,6 +241,8 @@ def set_answer(round_id):
     rd = get_round(round_id)
 
     if request.method == "POST":
+        if request.form["x"] == "" or request.form["y"] == "":
+            return render_template("set_answer.html", map_fn=rd.map_filename, error="You should select a point on the map before saving.")
         x = int(request.form["x"])
         y = int(request.form["y"])
         rd.answer_xy = (x, y)

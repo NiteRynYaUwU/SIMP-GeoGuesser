@@ -33,6 +33,9 @@
     <div class="card">
       <div class="tag">Map</div>
       <p class="muted" style="margin:10px 0 10px 0;">Selected: <span class="xy" id="xy">(none)</span></p>
+      {% if error %}
+        <p style="color:var(--bad); margin:0 0 10px 0;">{{error}}</p>
+      {% endif %}
       <img id="map" src="{{url_for('uploads', filename=map_fn)}}" />
       <form method="post" style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <input type="hidden" name="x" id="x" />
