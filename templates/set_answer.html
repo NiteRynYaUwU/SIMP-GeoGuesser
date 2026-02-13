@@ -1,0 +1,61 @@
+<!doctype html>
+<html><head>
+  <meta charset="utf-8" />
+  <title>Set Answer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#ffffff; --text:#101828; --muted:#475467;
+      --border:#e4e7ec; --accent:#2563eb; --accent2:#1d4ed8;
+      --good:#067647; --bad:#b42318; --radius:14px;
+    }
+    body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text); background: linear-gradient(180deg, #f6f7fb, #eef2ff); padding:24px 18px; }
+    .wrap{max-width:1200px; margin:0 auto;}
+    .card{ background: var(--card); border-radius: var(--radius); padding: 18px; border: 1px solid var(--border); }
+    img{max-width:100%; border-radius:12px; border:1px solid var(--border); cursor: crosshair;}
+    .muted{color:var(--muted);}
+    button{ padding:10px 12px; border-radius:12px; border:1px solid var(--border);
+      background: var(--accent); color:white; cursor:pointer; font-weight:900; }
+    button:hover{background: var(--accent2);}
+    a{color:var(--accent); text-decoration:none; font-weight:900;}
+    .xy{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;}
+    .tag{
+      display:inline-flex; padding: 4px 10px; border-radius: 999px;
+      background: #eff6ff; color: #1d4ed8; font-weight: 800; font-size: 12px; border: 1px solid #dbeafe;
+    }
+  </style>
+</head><body>
+  <div class="wrap">
+    <h1 style="margin:0 0 6px 0; font-size:24px; letter-spacing:-0.02em;">Set the correct answer spot</h1>
+    <p class="muted" style="margin:0 0 14px 0;">Click on the map, then save.</p>
+
+    <div class="card">
+      <div class="tag">Map</div>
+      <p class="muted" style="margin:10px 0 10px 0;">Selected: <span class="xy" id="xy">(none)</span></p>
+      <img id="map" src="{{url_for('uploads', filename=map_fn)}}" />
+      <form method="post" style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <input type="hidden" name="x" id="x" />
+        <input type="hidden" name="y" id="y" />
+        <button type="submit">Save answer</button>
+        <a href="{{url_for('host')}}">Cancel</a>
+      </form>
+    </div>
+  </div>
+
+<script>
+const img = document.getElementById("map");
+const xInput = document.getElementById("x");
+const yInput = document.getElementById("y");
+const xy = document.getElementById("xy");
+
+img.addEventListener("click", (e) => {
+  const rect = img.getBoundingClientRect();
+  const x = Math.round((e.clientX - rect.left) * (img.naturalWidth / rect.width));
+  const y = Math.round((e.clientY - rect.top) * (img.naturalHeight / rect.height));
+  xInput.value = x;
+  yInput.value = y;
+  xy.textContent = `(${x}, ${y})`;
+});
+</script>
+</body></html>
