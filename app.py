@@ -107,11 +107,24 @@ def save_upload(file_storage) -> str:
         raise ValueError("No file selected.")
     if not ext_ok(file_storage.filename):
         raise ValueError("Unsupported file type. Use png/jpg/jpeg/webp.")
-    _, ext = os.path.splitext(file_storage.filename.lower())
-    safe_name = f"{uuid.uuid4().hex}{ext}"
-    path = os.path.join(UPLOAD_DIR, safe_name)
+    base = os.path.basename(file_storage.filename)
+    stem, ext = os.path.splitext(base)
+    ext = ext.lower()
+
+    # Sanitize the stem: keep alnum, space, dash, underscore; replace others with '_'
+    cleaned_stem = "".join(ch if ch.isalnum() or ch in {" ", "-", "_"} else "_" for ch in stem).strip()
+    if not cleaned_stem:
+        cleaned_stem = "upload"
+
+    candidate = f"{cleaned_stem}{ext}"
+    counter = 1
+    while os.path.exists(os.path.join(UPLOAD_DIR, candidate)):
+        candidate = f"{cleaned_stem}({counter}){ext}"
+        counter += 1
+
+    path = os.path.join(UPLOAD_DIR, candidate)
     file_storage.save(path)
-    return safe_name
+    return candidate
 
 
 def pixel_distance(a: Tuple[int, int], b: Tuple[int, int]) -> float:
