@@ -43,6 +43,8 @@ class GameState:
 
 STATE = GameState()
 
+IMAGE_SIZE_CACHE: Dict[str, Tuple[float, Tuple[int, int]]] = {}
+
 
 # -----------------------------
 # Helpers
@@ -50,6 +52,45 @@ STATE = GameState()
 def ext_ok(filename: str) -> bool:
     _, ext = os.path.splitext(filename.lower())
     return ext in ALLOWED_EXT
+
+
+def get_image_size(path: str) -> Tuple[int, int]:
+    """
+    Read image dimensions with a tiny mtime-aware cache to avoid reopening files.
+    """
+    stat = os.stat(path)
+    cache = IMAGE_SIZE_CACHE.get(path)
+    if cache and cache[0] == stat.st_mtime:
+        return cache[1]
+
+    with Image.open(path) as im:
+        size = im.size
+
+    IMAGE_SIZE_CACHE[path] = (stat.st_mtime, size)
+    return size
+
+
+def list_map_library() -> List[Dict[str, object]]:
+    """
+    Return all uploaded maps (already on disk) with their dimensions.
+    Used to let hosts reuse images across rounds.
+    """
+    items: List[Dict[str, object]] = []
+    if not os.path.isdir(UPLOAD_DIR):
+        return items
+
+    for name in sorted(os.listdir(UPLOAD_DIR)):
+        if not ext_ok(name):
+            continue
+        path = os.path.join(UPLOAD_DIR, name)
+        if not os.path.isfile(path):
+            continue
+        try:
+            size = get_image_size(path)
+        except Exception:
+            continue
+        items.append({"filename": name, "size": size})
+    return items
 
 
 def normalize_player_name(name: str) -> str:
@@ -193,12 +234,20 @@ def host():
                         rd.guesses.pop(name, None)
 
             elif action == "add_round":
-                map_file = request.files.get("map_image")
-                filename = save_upload(map_file)
+                existing_map = (request.form.get("existing_map") or "").strip()
 
-                path = os.path.join(UPLOAD_DIR, filename)
-                with Image.open(path) as im:
-                    w, h = im.size
+                if existing_map:
+                    candidate = os.path.basename(existing_map)
+                    path = os.path.join(UPLOAD_DIR, candidate)
+                    if not ext_ok(candidate) or not os.path.isfile(path):
+                        raise ValueError("Selected map is not available anymore.")
+                    filename = candidate
+                    w, h = get_image_size(path)
+                else:
+                    map_file = request.files.get("map_image")
+                    filename = save_upload(map_file)
+                    path = os.path.join(UPLOAD_DIR, filename)
+                    w, h = get_image_size(path)
 
                 rd = Round(id=uuid.uuid4().hex, map_filename=filename, map_size=(w, h))
                 STATE.rounds.append(rd)
@@ -221,6 +270,7 @@ def host():
             msg = str(e)
 
     current = current_round()
+    map_library = list_map_library()
 
     return render_template(
         "host.html",
@@ -229,6 +279,7 @@ def host():
         rounds=STATE.rounds,
         current=current,
         round_index=STATE.current_round_index,
+        map_library=map_library,
     )
 
 

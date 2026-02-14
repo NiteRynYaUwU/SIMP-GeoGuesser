@@ -202,10 +202,26 @@
 
             <div class="card">
                 <div class="tag">Rounds</div>
-                <div class="muted" style="margin-top:8px;">Each round only needs <b>one image</b>: the overall map.</div>
-                <form method="post" enctype="multipart/form-data" class="row" style="margin-top:12px;">
+                <div class="muted" style="margin-top:8px;">Each round only needs <b>one image</b>: upload a new map or reuse an existing upload.</div>
+                <form method="post" enctype="multipart/form-data" class="row" style="margin-top:12px; gap:10px; align-items:flex-start; flex-wrap:wrap;">
                     <input type="hidden" name="action" value="add_round" />
-                    <input type="file" name="map_image" accept=".png,.jpg,.jpeg,.webp" required />
+
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <span class="muted" style="font-size:13px;">Upload new map</span>
+                        <input type="file" name="map_image" accept=".png,.jpg,.jpeg,.webp" />
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <span class="muted" style="font-size:13px;">Or reuse previous</span>
+                        <select name="existing_map" style="min-width:240px;">
+                            <option value="">{% if map_library %}Choose an uploaded map{% else %}No uploads yet{% endif %}</option>
+                            {% for m in map_library %}
+                            <option value="{{m.filename}}">{{m.filename}} ({{m.size[0]}}×{{m.size[1]}})</option>
+                            {% endfor %}
+                        </select>
+                        <span class="muted" style="font-size:12px;">If you pick one here, the file input is ignored.</span>
+                    </div>
+
                     <button type="submit">Add round</button>
                 </form>
                 {% if rounds %}
