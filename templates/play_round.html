@@ -26,6 +26,33 @@
       border-radius: 14px; border: 1px solid var(--border);
       z-index: 10;
     }
+    .roundTitle{
+      font-size: 13px;
+      font-weight: 950;
+      color: var(--text);
+    }
+    .navbtn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 9px 11px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 950;
+      font-size: 14px;
+      cursor: pointer;
+      pointer-events: auto; /* IMPORTANT because .hud sits above .overlay which has pointer-events:none */
+    }
+    .navbtn:hover{ background:#f2f4f7; text-decoration:none; }
+    .navbtn.disabled{
+      opacity: .45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     .group{ display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
     label{ font-size: 12px; color: var(--muted); font-weight:900; }
     select, input{
@@ -61,6 +88,33 @@
       border: 1px solid var(--border); font-weight: 950; color: var(--text);
       display:none; z-index: 20;
     }
+        .roundTitle{
+      font-size: 13px;
+      font-weight: 950;
+      color: var(--text);
+    }
+    .navbtn{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 9px 11px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 950;
+      font-size: 14px;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .navbtn:hover{ background:#f2f4f7; text-decoration:none; }
+    .navbtn.disabled{
+      opacity: .45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
   </style>
 </head><body>
 
@@ -72,6 +126,23 @@
   </div>
 
   <div class="hud">
+        <!-- Round header + navigation -->
+    <div class="group">
+      <span class="roundTitle">Round {{ round_num }} / {{ total_rounds }}</span>
+
+      {% if prev_round_id %}
+        <a class="navbtn" href="{{ url_for('play_round', round_id=prev_round_id) }}">← Prev</a>
+      {% else %}
+        <span class="navbtn disabled">← Prev</span>
+      {% endif %}
+
+      {% if next_round_id %}
+        <a class="navbtn" href="{{ url_for('play_round', round_id=next_round_id) }}">Next →</a>
+      {% else %}
+        <span class="navbtn disabled">Next →</span>
+      {% endif %}
+    </div>
+
     <div class="group">
       <label for="player">Player</label>
       <select id="player"></select>

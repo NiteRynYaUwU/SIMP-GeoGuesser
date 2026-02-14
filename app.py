@@ -245,7 +245,9 @@ def set_answer(round_id):
     round_num = STATE.rounds.index(rd) + 1
 
     if request.method == "POST":
-        if request.form["x"] == "" or request.form["y"] == "":
+        xv = request.form.get("x", "")
+        yv = request.form.get("y", "")
+        if xv == "" or yv == "":
             return render_template("set_answer.html", map_fn=rd.map_filename, error="You should select a point on the map before saving.")
         x = int(request.form["x"])
         y = int(request.form["y"])
@@ -262,13 +264,32 @@ def set_answer(round_id):
 @app.route("/play/<round_id>")
 def play_round(round_id):
     rd = get_round(round_id)
-    round_num = STATE.rounds.index(rd) + 1
 
+    # If answer isn't set yet, force host to set it first
     if rd.answer_xy is None:
         return redirect(url_for("set_answer", round_id=round_id))
 
-    return render_template("play_round.html", map_fn=rd.map_filename, round_id=round_id, round_num=round_num)
+    # Round position (1-based) + navigation
+    try:
+        idx = STATE.rounds.index(rd)   # rd is the same object from STATE.rounds
+    except ValueError:
+        abort(404)
 
+    total = len(STATE.rounds)
+    round_num = idx + 1
+
+    prev_round_id = STATE.rounds[idx - 1].id if idx > 0 else None
+    next_round_id = STATE.rounds[idx + 1].id if idx < total - 1 else None
+
+    return render_template(
+        "play_round.html",
+        map_fn=rd.map_filename,
+        round_id=round_id,
+        round_num=round_num,
+        total_rounds=total,
+        prev_round_id=prev_round_id,
+        next_round_id=next_round_id,
+    )
 
 @app.route("/leaderboard")
 def leaderboard():
