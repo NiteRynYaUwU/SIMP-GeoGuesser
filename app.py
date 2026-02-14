@@ -139,9 +139,6 @@ def api_guess():
         return jsonify({"ok": False, "error": "Missing round_id."}), 400
     rd = get_round(round_id)
 
-    if rd.answer_xy is None:
-        return jsonify({"ok": False, "error": "Answer not set for this round."}), 400
-
     if not player or player not in STATE.players:
         return jsonify({"ok": False, "error": "Invalid player."}), 400
 
@@ -162,12 +159,8 @@ def api_guess():
 @app.route("/api/round_state/<round_id>", methods=["GET"])
 def api_round_state(round_id):
     rd = get_round(round_id)
-    if rd.answer_xy is None:
-        return jsonify({"ok": False, "error": "Round not ready."}), 403
-
     guesses = {p: {"x": xy[0], "y": xy[1]} for p, xy in rd.guesses.items()}
     return jsonify({"ok": True, "players": STATE.players, "guesses": guesses})
-
 
 # -----------------------------
 # Pages (Flat design)
@@ -265,13 +258,9 @@ def set_answer(round_id):
 def play_round(round_id):
     rd = get_round(round_id)
 
-    # If answer isn't set yet, force host to set it first
-    if rd.answer_xy is None:
-        return redirect(url_for("set_answer", round_id=round_id))
-
-    # Round position (1-based) + navigation
+    # Find this rounds index
     try:
-        idx = STATE.rounds.index(rd)   # rd is the same object from STATE.rounds
+        idx = STATE.rounds.index(rd)
     except ValueError:
         abort(404)
 
@@ -289,6 +278,7 @@ def play_round(round_id):
         total_rounds=total,
         prev_round_id=prev_round_id,
         next_round_id=next_round_id,
+        answer_set=(rd.answer_xy is not None),
     )
 
 @app.route("/leaderboard")
@@ -337,12 +327,29 @@ def leaderboard():
 @app.route("/r/<round_id>")
 def public_round(round_id):
     rd = get_round(round_id)
-    round_num = STATE.rounds.index(rd) + 1
 
-    if rd.answer_xy is None:
-        return "This round is not ready yet (host hasn't set the answer).", 403
+    # Find this round's index
+    try:
+        idx = STATE.rounds.index(rd)
+    except ValueError:
+        abort(404)
 
-    return render_template("play_round.html", map_fn=rd.map_filename, round_id=round_id, round_num=round_num)
+    total = len(STATE.rounds)
+    round_num = idx + 1
+
+    prev_round_id = STATE.rounds[idx - 1].id if idx > 0 else None
+    next_round_id = STATE.rounds[idx + 1].id if idx < total - 1 else None
+
+    return render_template(
+        "play_round.html",
+        map_fn=rd.map_filename,
+        round_id=round_id,
+        round_num=round_num,
+        total_rounds=total,
+        prev_round_id=prev_round_id,
+        next_round_id=next_round_id,
+        answer_set=(rd.answer_xy is not None),
+    )
 
 if __name__ == "__main__":
     print(f"Running on http://{APP_HOST}:{APP_PORT}")

@@ -225,11 +225,7 @@
                         </td>
 
                         <td>
-                            {% if rd.answer_xy %}
                             <a class="tag" href="{{ url_for('public_round', round_id=rd.id) }}" target="_blank">Open play</a>
-                            {% else %}
-                            <span class="tag" style="background:#f2f4f7;border-color:#e4e7ec;color:#475467;">disabled</span>
-                            {% endif %}
                         </td>
 
                         <td>
@@ -258,15 +254,9 @@
                 <div class="row">
                     <a class="tag" href="{{url_for('set_answer', round_id=current.id)}}" target="_blank" rel="noopener">Set answer</a>
 
-                    {% if current.answer_xy %}
                     <a class="tag" href="{{url_for('public_round', round_id=current.id)}}" target="_blank">
                         Player link
                     </a>
-                    {% else %}
-                    <span class="tag" style="background:#f2f4f7;border-color:#e4e7ec;color:#475467;">
-                        Player link disabled
-                    </span>
-                    {% endif %}
                 </div>
             </div>
 
