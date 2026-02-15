@@ -99,8 +99,8 @@
     const rect = stage.getBoundingClientRect();
     const { left, top } = imageTopLeft();
     const { s } = currentRenderSize();
-    const xInStage = clientX - rect.left;
-    const yInStage = clientY - rect.top;
+    const xInStage = clientX - rect.left - stage.clientLeft;
+    const yInStage = clientY - rect.top - stage.clientTop;
     return { x: (xInStage - left) / s, y: (yInStage - top) / s };
   }
 
