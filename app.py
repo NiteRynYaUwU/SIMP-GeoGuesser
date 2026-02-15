@@ -263,12 +263,18 @@ def host():
                     if not ext_ok(candidate) or not os.path.isfile(path):
                         raise ValueError("Selected map is not available anymore.")
                     filename = candidate
-                    w, h = get_image_size(path)
+                    try:
+                        w, h = get_image_size(path)
+                    except Exception:
+                        raise ValueError("The selected image file appears to be corrupted or invalid.")
                 else:
                     map_file = request.files.get("map_image")
                     filename = save_upload(map_file)
                     path = os.path.join(UPLOAD_DIR, filename)
-                    w, h = get_image_size(path)
+                    try:
+                        w, h = get_image_size(path)
+                    except Exception:
+                        raise ValueError("The selected image file appears to be corrupted or invalid.")
 
                 rd = Round(id=uuid.uuid4().hex, map_filename=filename, map_size=(w, h))
                 STATE.rounds.append(rd)
