@@ -219,7 +219,7 @@
   function onWheel(e) {
     if (!img.naturalWidth) return;
     const delta = e.deltaY;
-    const factor = delta < 0 ? 1.1 : 0.9;
+    const factor = Math.exp(-delta * 0.0012);
     const prevZoom = zoom;
     zoom = clamp(zoom * factor, 0.5, 6);
     const { x, y } = screenToImageCoords(e.clientX, e.clientY);
