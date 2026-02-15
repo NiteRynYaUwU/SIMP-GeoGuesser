@@ -127,7 +127,15 @@ def register_routes(app):
                     # Optional scene image (the photo/scene players see).
                     scene_file = request.files.get("scene_image")
                     if scene_file and scene_file.filename:
-                        rd.scene_filename = save_upload(scene_file)
+                        scene_filename = save_upload(scene_file)
+                        scene_path = os.path.join(UPLOAD_DIR, scene_filename)
+                        try:
+                            get_image_size(scene_path)
+                        except Exception:
+                            os.remove(scene_path)
+                            raise ValueError(
+                                "The selected scene image file appears to be corrupted or invalid.")
+                        rd.scene_filename = scene_filename
                     STATE.rounds.append(rd)
                     STATE.current_round_index = len(STATE.rounds) - 1
 
@@ -139,7 +147,15 @@ def register_routes(app):
                     scene_file = request.files.get("scene_image")
                     if not scene_file or not scene_file.filename:
                         raise ValueError("No file selected.")
-                    rd.scene_filename = save_upload(scene_file)
+                    scene_filename = save_upload(scene_file)
+                    scene_path = os.path.join(UPLOAD_DIR, scene_filename)
+                    try:
+                        get_image_size(scene_path)
+                    except Exception:
+                        os.remove(scene_path)
+                        raise ValueError(
+                            "The selected scene image file appears to be corrupted or invalid.")
+                    rd.scene_filename = scene_filename
 
                 elif action == "reset_game":
                     STATE.players = []
