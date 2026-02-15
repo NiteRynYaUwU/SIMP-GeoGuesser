@@ -235,7 +235,7 @@
     const anchorX = (xInStage - preLeft) / preScale;
     const anchorY = (yInStage - preTop) / preScale;
 
-    zoom = clamp(zoom * factor, 0.4, 6);
+    zoom = clamp(zoom * factor, 0.4, 12);
 
     const { left: postLeft, top: postTop } = imageTopLeft();
     const { s: postScale } = currentRenderSize();
@@ -312,7 +312,7 @@
 
   function zoomBy(delta) {
     const factor = delta > 0 ? 1.2 : 0.8;
-    zoom = clamp(zoom * factor, 0.4, 6);
+    zoom = clamp(zoom * factor, 0.4, 12);
     layoutImage();
   }
 
