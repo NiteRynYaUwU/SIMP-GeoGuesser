@@ -221,15 +221,19 @@
     const delta = e.deltaY;
     const factor = delta < 0 ? 1.1 : 0.9;
     const prevZoom = zoom;
-    zoom = clamp(zoom * factor, 0.4, 6);
+    zoom = clamp(zoom * factor, 0.5, 6);
     const { x, y } = screenToImageCoords(e.clientX, e.clientY);
     const { left, top } = imageTopLeft();
-    const { s } = currentRenderSize();
+    const { w, h, s } = currentRenderSize();
     const preSx = left + x * s;
     const preSy = top + y * s;
     const ns = baseScale * zoom;
-    panX += preSx - (left + x * ns);
-    panY += preSy - (top + y * ns);
+    const vw = stage.clientWidth;
+    const vh = stage.clientHeight;
+    const newLeft = (vw - w * ns) / 2;
+    const newTop = (vh - h * ns) / 2;
+    panX += preSx - (newLeft + x * ns);
+    panY += preSy - (newTop + y * ns);
     layoutImage();
   }
 
@@ -252,8 +256,13 @@
       document.removeEventListener("mousemove", move);
       document.removeEventListener("mouseup", up);
       if (!moved) {
+        const player = playerSel.value;
+        if (!player) {
+          showToast("Add at least one player first.", true);
+          return;
+        }
         const pt = screenToImageCoords(ev.clientX, ev.clientY);
-        guesses[playerSel.value] = { x: Math.round(pt.x), y: Math.round(pt.y) };
+        guesses[player] = { x: Math.round(pt.x), y: Math.round(pt.y) };
         refreshPin();
         saveGuess();
       }
@@ -308,7 +317,28 @@
     onWheel(e);
   }, { passive: false });
 
-  stage.addEventListener("mousedown", onDragStart);
+  function handlePointerDown(e) {
+    // Use pointer events for touch/stylus while keeping existing mouse behavior.
+    if (typeof PointerEvent === "undefined") {
+      return;
+    }
+    // Let the existing mousedown handler deal with mouse input.
+    if (e.pointerType === "mouse") {
+      return;
+    }
+    // Capture the pointer so dragging keeps working even if it leaves the element.
+    try {
+      if (typeof stage.setPointerCapture === "function") {
+        stage.setPointerCapture(e.pointerId);
+      }
+    } catch (err) {
+      // Ignore capture errors; dragging will still work in most cases.
+    }
+    onDragStart(e);
+  }
+
+  stage.addEventListener("pointerdown", handlePointerDown);
+  stage.addEventListener("pointerdown", onDragStart);
 
   window.addEventListener("resize", layoutImage);
   img.addEventListener("load", layoutImage);
