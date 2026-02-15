@@ -219,7 +219,7 @@ def host():
                 raise ValueError("Unknown action.")
 
             #PRG: redirect after ANY successful POST to prevent duplicate submission on refresh
-            return redirect(url_for("host"))
+            return redirect(url_for("host"), code=303)
 
         except Exception as e:
             msg = str(e)
