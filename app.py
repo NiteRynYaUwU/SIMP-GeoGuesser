@@ -172,8 +172,8 @@ def home():
 
 @app.route("/host", methods=["GET", "POST"])
 def host():
-    # Allow showing a one-off message after redirects
-    msg = request.args.get("msg", "")
+    # Message shown on the host page (set server-side only)
+    msg = ""
 
     if request.method == "POST":
         action = request.form.get("action")
