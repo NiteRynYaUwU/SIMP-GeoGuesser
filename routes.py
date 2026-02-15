@@ -96,18 +96,21 @@ def register_routes(app):
                             rd.guesses.pop(name, None)
 
                 elif action == "add_round":
-                    existing_map = (request.form.get("existing_map") or "").strip()
+                    existing_map = (request.form.get(
+                        "existing_map") or "").strip()
 
                     if existing_map:
                         candidate = os.path.basename(existing_map)
                         path = os.path.join(UPLOAD_DIR, candidate)
                         if not ext_ok(candidate) or not os.path.isfile(path):
-                            raise ValueError("Selected map is not available anymore.")
+                            raise ValueError(
+                                "Selected map is not available anymore.")
                         filename = candidate
                         try:
                             w, h = get_image_size(path)
                         except Exception:
-                            raise ValueError("The selected image file appears to be corrupted or invalid.")
+                            raise ValueError(
+                                "The selected image file appears to be corrupted or invalid.")
                     else:
                         map_file = request.files.get("map_image")
                         filename = save_upload(map_file)
@@ -115,9 +118,11 @@ def register_routes(app):
                         try:
                             w, h = get_image_size(path)
                         except Exception:
-                            raise ValueError("The selected image file appears to be corrupted or invalid.")
+                            raise ValueError(
+                                "The selected image file appears to be corrupted or invalid.")
 
-                    rd = Round(id=uuid.uuid4().hex, map_filename=filename, map_size=(w, h))
+                    rd = Round(id=uuid.uuid4().hex,
+                               map_filename=filename, map_size=(w, h))
                     STATE.rounds.append(rd)
                     STATE.current_round_index = len(STATE.rounds) - 1
 
@@ -209,7 +214,8 @@ def register_routes(app):
             if rd.answer_xy is None:
                 continue
 
-            guesses_obj = {p: {"x": xy[0], "y": xy[1]} for p, xy in rd.guesses.items()}
+            guesses_obj = {p: {"x": xy[0], "y": xy[1]}
+                           for p, xy in rd.guesses.items()}
 
             row = {
                 "index": i + 1,
