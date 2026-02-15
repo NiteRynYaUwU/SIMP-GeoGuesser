@@ -102,7 +102,7 @@ def register_routes(app):
 
                     if existing_map:
                         candidate = os.path.basename(existing_map)
-                        path = os.path.join(UPLOAD_DIR, candidate)
+                        path = os.path.join(UPLOAD_DIR, "maps", candidate)
                         if not ext_ok(candidate) or not os.path.isfile(path):
                             raise ValueError("Selected map is not available anymore.")
                         filename = candidate
@@ -113,7 +113,7 @@ def register_routes(app):
                     else:
                         map_file = request.files.get("map_image")
                         filename = save_map_upload(map_file)
-                        path = os.path.join(UPLOAD_DIR, filename)
+                        path = os.path.join(UPLOAD_DIR, "maps", filename)
                         try:
                             w, h = get_image_size(path)
                         except Exception:
@@ -130,7 +130,7 @@ def register_routes(app):
 
                     if existing_scene:
                         candidate = os.path.basename(existing_scene)
-                        path = os.path.join(UPLOAD_DIR, candidate)
+                        path = os.path.join(UPLOAD_DIR, "scenes", candidate)
                         if not ext_ok(candidate) or not os.path.isfile(path):
                             raise ValueError("Selected scene is not available anymore.")
                         try:
@@ -142,7 +142,7 @@ def register_routes(app):
                         scene_file = request.files.get("scene_image")
                         if scene_file and scene_file.filename:
                             filename_scene = save_scene_upload(scene_file)
-                            path_scene = os.path.join(UPLOAD_DIR, filename_scene)
+                            path_scene = os.path.join(UPLOAD_DIR, "scenes", filename_scene)
                             try:
                                 _ = get_image_size(path_scene)
                             except Exception:
@@ -163,7 +163,7 @@ def register_routes(app):
                     scene_file = request.files.get("scene_image")
                     if not scene_file or not scene_file.filename:
                         raise ValueError("No file selected.")
-                    rd.scene_filename = save_upload(scene_file)
+                    rd.scene_filename = save_scene_upload(scene_file)
 
                 elif action == "reset_game":
                     STATE.players = []

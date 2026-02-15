@@ -50,15 +50,16 @@ def get_image_size(path: str) -> Tuple[int, int]:
     return size
 
 
-def list_map_library() -> List[Dict[str, object]]:
+def list_image_library(subfolder) -> List[Dict[str, object]]:
     items: List[Dict[str, object]] = []
-    if not os.path.isdir(UPLOAD_DIR):
+    image_library_path = os.path.join(UPLOAD_DIR, subfolder)
+    if not os.path.isdir(image_library_path):
         return items
 
-    for name in sorted(os.listdir(UPLOAD_DIR)):
+    for name in sorted(os.listdir(image_library_path)):
         if not ext_ok(name):
             continue
-        path = os.path.join(UPLOAD_DIR, name)
+        path = os.path.join(image_library_path, name)
         if not os.path.isfile(path):
             continue
         try:
@@ -69,11 +70,12 @@ def list_map_library() -> List[Dict[str, object]]:
     return items
 
 
+def list_map_library() -> List[Dict[str, object]]:
+    return list_image_library("maps")
+
+
 def list_scene_library():
-    # For now, scene uploads live in the same cache folder as maps,
-    # so we reuse the same listing logic.
-    # Later you can split folders or add filtering rules here.
-    return list_map_library()
+    return list_image_library("scenes")
 
 
 def normalize_player_name(name: str) -> str:
@@ -149,3 +151,9 @@ def current_round() -> Optional[Round]:
         return None
     idx = min(max(STATE.current_round_index, 0), len(STATE.rounds) - 1)
     return STATE.rounds[idx]
+
+
+def setup_upload_dirs():
+    for sub in ["maps", "scenes"]:
+        path = os.path.join(UPLOAD_DIR, sub)
+        os.makedirs(path, exist_ok=True)
