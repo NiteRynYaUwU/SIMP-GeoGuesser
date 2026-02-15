@@ -16,6 +16,8 @@ class Round:
     id: str
     map_filename: str
     map_size: Tuple[int, int]  # (w,h) in pixels
+    # Optional "scene" image shown to players for this round (does not affect scoring).
+    scene_filename: Optional[str] = None
     answer_xy: Optional[Tuple[int, int]] = None
     guesses: Dict[str, Tuple[int, int]] = field(default_factory=dict)
 

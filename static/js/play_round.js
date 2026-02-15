@@ -51,13 +51,15 @@
   }
 
   function setOverlaySize() {
-    overlay.setAttribute("width", window.innerWidth);
-    overlay.setAttribute("height", window.innerHeight);
+    const w = stage?.clientWidth || 1;
+    const h = stage?.clientHeight || 1;
+    overlay.setAttribute("width", w);
+    overlay.setAttribute("height", h);
   }
 
   function computeBaseScale() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const vw = stage?.clientWidth || window.innerWidth;
+    const vh = stage?.clientHeight || window.innerHeight;
     const iw = img.naturalWidth || 1;
     const ih = img.naturalHeight || 1;
     baseScale = Math.min(vw / iw, vh / ih);
@@ -71,8 +73,8 @@
   }
 
   function imageTopLeft() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const vw = stage?.clientWidth || window.innerWidth;
+    const vh = stage?.clientHeight || window.innerHeight;
     const { w, h } = currentRenderSize();
     const left = (vw - w) / 2 + panX;
     const top = (vh - h) / 2 + panY;
@@ -94,9 +96,12 @@
   }
 
   function screenToImageCoords(clientX, clientY) {
+    const rect = stage.getBoundingClientRect();
     const { left, top } = imageTopLeft();
     const { s } = currentRenderSize();
-    return { x: (clientX - left) / s, y: (clientY - top) / s };
+    const xInStage = clientX - rect.left;
+    const yInStage = clientY - rect.top;
+    return { x: (xInStage - left) / s, y: (yInStage - top) / s };
   }
 
   function imageToScreenCoords(x, y) {
@@ -218,14 +223,17 @@
 
   function onWheel(e) {
     if (!img.naturalWidth) return;
+    const rect = stage.getBoundingClientRect();
     const delta = e.deltaY;
     const factor = Math.exp(-delta * 0.0012);
 
     // Anchor under cursor using pre-zoom state only (no baseScale recompute).
     const { left: preLeft, top: preTop } = imageTopLeft();
     const { s: preScale } = currentRenderSize();
-    const anchorX = (e.clientX - preLeft) / preScale;
-    const anchorY = (e.clientY - preTop) / preScale;
+    const xInStage = e.clientX - rect.left;
+    const yInStage = e.clientY - rect.top;
+    const anchorX = (xInStage - preLeft) / preScale;
+    const anchorY = (yInStage - preTop) / preScale;
 
     zoom = clamp(zoom * factor, 0.4, 6);
 

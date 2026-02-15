@@ -14,15 +14,29 @@
     />
   </head>
   <body data-round-id="{{ round_id }}">
-    <div class="stage" id="stage">
-      <div id="mapLayer">
-        <img
-          id="mapImg"
-          src="{{url_for('uploads', filename=map_fn)}}"
-          alt="Map"
-        />
+    <div class="scene" id="scene">
+      {% if scene_fn %}
+      <img
+        id="sceneImg"
+        src="{{ url_for('uploads', filename=scene_fn) }}"
+        alt="Scene"
+      />
+      {% else %}
+      <div class="scenePlaceholder">
+        <div class="muted" style="font-weight: 950">No scene image uploaded</div>
+        <div class="muted" style="font-size: 12px; margin-top: 6px">
+          Host can upload one in the Host panel → Rounds.
+        </div>
       </div>
-      <svg id="overlay" class="overlay"></svg>
+      {% endif %}
+
+      <!-- Minimap (drag/zoom/click to place pins) -->
+      <div class="stage minimap" id="stage" aria-label="Minimap">
+        <div id="mapLayer">
+          <img id="mapImg" src="{{url_for('uploads', filename=map_fn)}}" alt="Map" />
+        </div>
+        <svg id="overlay" class="overlay"></svg>
+      </div>
     </div>
 
     <div class="hud">
@@ -86,8 +100,8 @@
 
     <div class="hint">
       <div class="chip">
-        Drag to pan · Mouse wheel / buttons to zoom · Click (no drag) to place
-        pin
+        Use the minimap: drag to pan · wheel/buttons to zoom · click (no drag)
+        to place pin
       </div>
     </div>
 

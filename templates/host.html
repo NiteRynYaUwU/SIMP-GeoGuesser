@@ -70,8 +70,8 @@
         <div class="card">
           <div class="tag">Rounds</div>
           <div class="muted" style="margin-top: 8px">
-            Each round only needs <b>one image</b>: upload a new map or reuse an
-            existing upload.
+            Each round needs a <b>map</b> (for pin placement/scoring). Optionally
+            upload a <b>scene image</b> (what players see).
           </div>
           <form
             method="post"
@@ -94,6 +94,18 @@
                 id="map_image"
                 type="file"
                 name="map_image"
+                accept=".png,.jpg,.jpeg,.webp"
+              />
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <label for="scene_image" class="muted" style="font-size: 13px"
+                >Scene image (optional)</label
+              >
+              <input
+                id="scene_image"
+                type="file"
+                name="scene_image"
                 accept=".png,.jpg,.jpeg,.webp"
               />
             </div>
@@ -130,6 +142,7 @@
             <tr>
               <th>#</th>
               <th>Map</th>
+              <th>Scene</th>
               <th>Answer</th>
               <th>Play link</th>
               <th></th>
@@ -138,6 +151,36 @@
             <tr>
               <td>{{ loop.index }}</td>
               <td><code>{{rd.map_filename}}</code></td>
+
+              <td>
+                {% if rd.scene_filename %}
+                <span
+                  class="tag"
+                  style="background: #eef4ff; border-color: #c7d7fe; color: #1d4ed8"
+                  >set</span
+                {% else %}
+                <span
+                  class="tag"
+                  style="background: #f2f4f7; border-color: #e4e7ec; color: #475467"
+                  >—</span
+                {% endif %}
+
+                <form
+                  method="post"
+                  enctype="multipart/form-data"
+                  style="margin: 6px 0 0; display: flex; gap: 8px; align-items: center"
+                >
+                  <input type="hidden" name="action" value="set_scene" />
+                  <input type="hidden" name="round_id" value="{{ rd.id }}" />
+                  <input
+                    type="file"
+                    name="scene_image"
+                    accept=".png,.jpg,.jpeg,.webp"
+                    style="max-width: 190px"
+                  />
+                  <button class="btn-ghost" type="submit">Upload</button>
+                </form>
+              </td>
 
               <td>
                 {% if rd.answer_xy %}

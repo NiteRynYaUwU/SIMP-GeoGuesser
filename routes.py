@@ -123,8 +123,23 @@ def register_routes(app):
 
                     rd = Round(id=uuid.uuid4().hex,
                                map_filename=filename, map_size=(w, h))
+
+                    # Optional scene image (the photo/scene players see).
+                    scene_file = request.files.get("scene_image")
+                    if scene_file and scene_file.filename:
+                        rd.scene_filename = save_upload(scene_file)
                     STATE.rounds.append(rd)
                     STATE.current_round_index = len(STATE.rounds) - 1
+
+                elif action == "set_scene":
+                    rid = (request.form.get("round_id") or "").strip()
+                    if not rid:
+                        raise ValueError("Missing round id.")
+                    rd = get_round(rid)
+                    scene_file = request.files.get("scene_image")
+                    if not scene_file or not scene_file.filename:
+                        raise ValueError("No file selected.")
+                    rd.scene_filename = save_upload(scene_file)
 
                 elif action == "reset_game":
                     STATE.players = []
@@ -197,6 +212,7 @@ def register_routes(app):
         return render_template(
             "play_round.html",
             map_fn=rd.map_filename,
+            scene_fn=rd.scene_filename,
             round_id=round_id,
             round_num=round_num,
             total_rounds=total,
