@@ -234,9 +234,12 @@ def home():
 
 @app.route("/host", methods=["GET", "POST"])
 def host():
+    # Message shown on the host page (set server-side only)
     msg = ""
+
     if request.method == "POST":
         action = request.form.get("action")
+
         try:
             if action == "add_player":
                 name = (request.form.get("player_name") or "").strip()
@@ -248,9 +251,8 @@ def host():
 
             elif action == "remove_player":
                 name = request.form.get("player_name")
-                if name:
-                    if name in STATE.players:
-                        STATE.players.remove(name)
+                if name and name in STATE.players:
+                    STATE.players.remove(name)
                     for rd in STATE.rounds:
                         rd.guesses.pop(name, None)
 
@@ -293,6 +295,10 @@ def host():
 
             else:
                 raise ValueError("Unknown action.")
+
+            #PRG: redirect after ANY successful POST to prevent duplicate submission on refresh
+            return redirect(url_for("host"), code=303)
+
         except Exception as e:
             msg = str(e)
 
@@ -308,6 +314,7 @@ def host():
         round_index=STATE.current_round_index,
         map_library=map_library,
     )
+
 
 
 @app.route("/set_answer/<round_id>", methods=["GET", "POST"])
