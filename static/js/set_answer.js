@@ -7,9 +7,8 @@
   const toast = document.getElementById("toast");
   const svg = document.getElementById("pinSvg");
 
-  function clamp(v, lo, hi) {
-    return Math.max(lo, Math.min(hi, v));
-  }
+  const clamp = window.GeoUtils?.clamp;
+  if (!clamp) return;
 
   function drawAnswerPin(x, y) {
     if (!svg || !img.naturalWidth || !img.naturalHeight) return;

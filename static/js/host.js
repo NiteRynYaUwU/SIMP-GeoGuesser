@@ -1,41 +1,7 @@
 (() => {
-  function clamp(v, lo, hi) {
-    return Math.max(lo, Math.min(hi, v));
-  }
-
-  function makePin(svg, cx, cy, label) {
-    const ns = "http://www.w3.org/2000/svg";
-    const g = document.createElementNS(ns, "g");
-    g.classList.add("pin");
-    g.dataset.label = label;
-
-    const tail = document.createElementNS(ns, "path");
-    tail.setAttribute("d", `M ${cx} ${cy + 11} L ${cx - 6} ${cy + 25} L ${cx + 6} ${cy + 25} Z`);
-    tail.setAttribute("fill", "rgba(37,99,235,0.98)");
-    tail.setAttribute("stroke", "rgba(16,24,40,0.18)");
-    tail.setAttribute("stroke-width", "2");
-
-    const outer = document.createElementNS(ns, "circle");
-    outer.setAttribute("cx", cx);
-    outer.setAttribute("cy", cy);
-    outer.setAttribute("r", "11");
-    outer.setAttribute("fill", "rgba(255,255,255,0.98)");
-    outer.setAttribute("stroke", "rgba(16,24,40,0.18)");
-    outer.setAttribute("stroke-width", "2");
-
-    const inner = document.createElementNS(ns, "circle");
-    inner.setAttribute("cx", cx);
-    inner.setAttribute("cy", cy);
-    inner.setAttribute("r", "4");
-    inner.setAttribute("fill", "rgba(37,99,235,0.98)");
-    inner.setAttribute("stroke", "rgba(16,24,40,0.18)");
-    inner.setAttribute("stroke-width", "1");
-
-    g.appendChild(tail);
-    g.appendChild(outer);
-    g.appendChild(inner);
-    svg.appendChild(g);
-  }
+  const utils = window.GeoUtils;
+  if (!utils) return;
+  const { clamp, makePin } = utils;
 
   function getGuesses() {
     const el = document.getElementById("hostGuessesJson");

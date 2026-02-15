@@ -33,9 +33,8 @@
   let panX = 0;
   let panY = 0;
 
-  function clamp(v, lo, hi) {
-    return Math.max(lo, Math.min(hi, v));
-  }
+  const clamp = window.GeoUtils?.clamp;
+  if (!clamp) return;
 
   function showToast(text, isError = false) {
     toast.textContent = text;
