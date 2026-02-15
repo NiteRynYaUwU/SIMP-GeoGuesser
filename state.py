@@ -68,11 +68,13 @@ def list_map_library() -> List[Dict[str, object]]:
         items.append({"filename": name, "size": size})
     return items
 
+
 def list_scene_library():
     # For now, scene uploads live in the same cache folder as maps,
     # so we reuse the same listing logic.
     # Later you can split folders or add filtering rules here.
     return list_map_library()
+
 
 def normalize_player_name(name: str) -> str:
     return (name or "").strip().casefold()
@@ -83,7 +85,7 @@ def player_exists(name: str) -> bool:
     return any(normalize_player_name(p) == n for p in STATE.players)
 
 
-def save_upload(file_storage) -> str:
+def save_upload(file_storage, sub_folder) -> str:
     if not file_storage or file_storage.filename == "":
         raise ValueError("No file selected.")
     if not ext_ok(file_storage.filename):
@@ -106,13 +108,21 @@ def save_upload(file_storage) -> str:
 
     candidate = f"{cleaned_stem}{ext}"
     counter = 1
-    while os.path.exists(os.path.join(UPLOAD_DIR, candidate)):
+    while os.path.exists(os.path.join(UPLOAD_DIR, sub_folder, candidate)):
         candidate = f"{cleaned_stem}({counter}){ext}"
         counter += 1
 
-    path = os.path.join(UPLOAD_DIR, candidate)
+    path = os.path.join(UPLOAD_DIR, sub_folder, candidate)
     file_storage.save(path)
     return candidate
+
+
+def save_scene_upload(file_storage) -> str:
+    return save_upload(file_storage, "scenes")
+
+
+def save_map_upload(file_storage) -> str:
+    return save_upload(file_storage, "maps")
 
 
 def pixel_distance(a: Tuple[int, int], b: Tuple[int, int]) -> float:

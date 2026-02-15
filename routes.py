@@ -14,7 +14,8 @@ from state import (
     list_scene_library,
     pixel_distance,
     player_exists,
-    save_upload,
+    save_map_upload,
+    save_scene_upload,
     score_from_distance,
 )
 
@@ -111,7 +112,7 @@ def register_routes(app):
                             raise ValueError("The selected image file appears to be corrupted or invalid.")
                     else:
                         map_file = request.files.get("map_image")
-                        filename = save_upload(map_file)
+                        filename = save_map_upload(map_file)
                         path = os.path.join(UPLOAD_DIR, filename)
                         try:
                             w, h = get_image_size(path)
@@ -140,7 +141,7 @@ def register_routes(app):
                     else:
                         scene_file = request.files.get("scene_image")
                         if scene_file and scene_file.filename:
-                            filename_scene = save_upload(scene_file)
+                            filename_scene = save_scene_upload(scene_file)
                             path_scene = os.path.join(UPLOAD_DIR, filename_scene)
                             try:
                                 _ = get_image_size(path_scene)
