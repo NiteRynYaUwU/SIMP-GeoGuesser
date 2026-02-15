@@ -207,13 +207,13 @@
                     <input type="hidden" name="action" value="add_round" />
 
                     <div style="display:flex; flex-direction:column; gap:6px;">
-                        <span class="muted" style="font-size:13px;">Upload new map</span>
-                        <input type="file" name="map_image" accept=".png,.jpg,.jpeg,.webp" />
+                        <label for="map_image" class="muted" style="font-size:13px;">Upload new map</label>
+                        <input id="map_image" type="file" name="map_image" accept=".png,.jpg,.jpeg,.webp" />
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:6px;">
-                        <span class="muted" style="font-size:13px;">Or reuse previous</span>
-                        <select name="existing_map" style="min-width:240px;">
+                        <label for="existing_map" class="muted" style="font-size:13px;">Or reuse previous</label>
+                        <select id="existing_map" name="existing_map" style="min-width:240px;">
                             <option value="">{% if map_library %}Choose an uploaded map{% else %}No uploads yet{% endif %}</option>
                             {% for m in map_library %}
                             <option value="{{m.filename}}">{{ m.filename[:40] }}{% if m.filename|length > 40 %}...{% endif %} ({{m.size[0]}}×{{m.size[1]}})</option>
