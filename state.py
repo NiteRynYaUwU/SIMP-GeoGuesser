@@ -68,6 +68,11 @@ def list_map_library() -> List[Dict[str, object]]:
         items.append({"filename": name, "size": size})
     return items
 
+def list_scene_library():
+    # For now, scene uploads live in the same cache folder as maps,
+    # so we reuse the same listing logic.
+    # Later you can split folders or add filtering rules here.
+    return list_map_library()
 
 def normalize_player_name(name: str) -> str:
     return (name or "").strip().casefold()

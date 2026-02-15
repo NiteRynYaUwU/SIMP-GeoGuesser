@@ -14,306 +14,279 @@
     />
   </head>
   <body>
-    <div class="wrap">
-      <div
-        class="row"
-        style="justify-content: space-between; align-items: flex-end"
-      >
-        <div>
-          <h1>SIMP GeoGuesser</h1>
-          <div class="muted">A Customizable GeoGuessing Game made for SIMP</div>
-        </div>
-        <div class="row">
-          <a class="tag" href="{{url_for('leaderboard')}}">Leaderboard</a>
-        </div>
-      </div>
-
-      {% if msg %}
-      <p class="err">{{msg}}</p>
-      {% endif %}
-
-      <div class="grid" style="margin-top: 14px">
-        <div class="card">
-          <div class="tag">Players</div>
-          <div class="muted" style="margin-top: 8px">
-            Add Player names(Can add during round)
+      <div class="wrap">
+          <div class="row"
+               style="justify-content: space-between; align-items: flex-end">
+              <div>
+                  <h1>SIMP GeoGuesser</h1>
+                  <div class="muted">A Customizable GeoGuessing Game made for SIMP</div>
+              </div>
+              <div class="row">
+                  <a class="tag" href="{{url_for('leaderboard')}}">Leaderboard</a>
+              </div>
           </div>
-          <form method="post" class="row" style="margin-top: 12px">
-            <input type="hidden" name="action" value="add_player" />
-            <input name="player_name" placeholder="e.g. Roger" />
-            <button type="submit">Add</button>
-          </form>
-          {% if players %}
-          <table style="margin-top: 10px">
-            <tr>
-              <th>Name</th>
-              <th></th>
-            </tr>
-            {% for p in players %}
-            <tr>
-              <td>{{p}}</td>
-              <td>
-                <form method="post" style="margin: 0">
-                  <input type="hidden" name="action" value="remove_player" />
-                  <input type="hidden" name="player_name" value="{{p}}" />
-                  <button class="btn-ghost" type="submit">Remove</button>
-                </form>
-              </td>
-            </tr>
-            {% endfor %}
-          </table>
-          {% else %}
-          <p class="muted" style="margin-top: 10px">No players yet.</p>
+
+          {% if msg %}
+          <p class="err">{{msg}}</p>
           {% endif %}
-        </div>
 
-        <div class="card">
-          <div class="tag">Rounds</div>
-          <div class="muted" style="margin-top: 8px">
-            Each round needs a <b>map</b> (for pin placement/scoring). Optionally
-            upload a <b>scene image</b> (what players see).
-          </div>
-          <form
-            method="post"
-            enctype="multipart/form-data"
-            class="row"
-            style="
-              margin-top: 12px;
-              gap: 10px;
-              align-items: flex-start;
-              flex-wrap: wrap;
-            "
-          >
-            <input type="hidden" name="action" value="add_round" />
+          <div class="grid" style="margin-top: 14px">
+              <div class="card">
+                  <div class="tag">Players</div>
+                  <div class="muted" style="margin-top: 8px">
+                      Add Player names(Can add during round)
+                  </div>
+                  <form method="post" class="row" style="margin-top: 12px">
+                      <input type="hidden" name="action" value="add_player" />
+                      <input name="player_name" placeholder="e.g. Roger" />
+                      <button type="submit">Add</button>
+                  </form>
+                  {% if players %}
+                  <table style="margin-top: 10px">
+                      <tr>
+                          <th>Name</th>
+                          <th></th>
+                      </tr>
+                      {% for p in players %}
+                      <tr>
+                          <td>{{p}}</td>
+                          <td>
+                              <form method="post" style="margin: 0">
+                                  <input type="hidden" name="action" value="remove_player" />
+                                  <input type="hidden" name="player_name" value="{{p}}" />
+                                  <button class="btn-ghost" type="submit">Remove</button>
+                              </form>
+                          </td>
+                      </tr>
+                      {% endfor %}
+                  </table>
+                  {% else %}
+                  <p class="muted" style="margin-top: 10px">No players yet.</p>
+                  {% endif %}
+              </div>
 
-            <div style="display: flex; flex-direction: column; gap: 6px">
-              <label for="map_image" class="muted" style="font-size: 13px"
-                >Upload new map</label
-              >
-              <input
-                id="map_image"
-                type="file"
-                name="map_image"
-                accept=".png,.jpg,.jpeg,.webp"
-              />
-            </div>
+              <div class="card">
+                  <div class="tag">Rounds</div>
+                  <div class="muted" style="margin-top: 8px">
+                      Each round needs a <b>map</b> (for pin placement/scoring) and a <b>scene image</b> (what players see).
+                  </div>
+                  <form method="post"
+                        enctype="multipart/form-data"
+                        class="row"
+                        style="
+                            margin-top: 12px;
+                            gap: 10px;
+                            align-items: flex-start;
+                            flex-wrap: wrap;
+                        ">
+                      <input type="hidden" name="action" value="add_round" />
 
-            <div style="display: flex; flex-direction: column; gap: 6px">
-              <label for="scene_image" class="muted" style="font-size: 13px"
-                >Scene image (optional)</label
-              >
-              <input
-                id="scene_image"
-                type="file"
-                name="scene_image"
-                accept=".png,.jpg,.jpeg,.webp"
-              />
-            </div>
+                      <!-- TWO COLUMNS -->
+                      <div style="display:flex; gap:20px; flex-wrap:wrap; width:100%;">
 
-            <div style="display: flex; flex-direction: column; gap: 6px">
-              <label for="existing_map" class="muted" style="font-size: 13px"
-                >Or reuse previous</label
-              >
-              <select
-                id="existing_map"
-                name="existing_map"
-                style="min-width: 240px"
-              >
-                <option value="">
-                  {% if map_library %}Choose an uploaded map{% else %}No uploads
-                  yet{% endif %}
-                </option>
-                {% for m in map_library %}
-                <option value="{{m.filename}}">
-                  {{ m.filename[:40] }}{% if m.filename|length > 40 %}...{%
-                  endif %} ({{m.size[0]}}×{{m.size[1]}})
-                </option>
-                {% endfor %}
-              </select>
-              <span class="muted" style="font-size: 12px"
-                >If you pick one here, the file input is ignored.</span
-              >
-            </div>
+                          <!-- LEFT: MAP -->
+                          <div style="flex:1; min-width:280px; display:flex; flex-direction:column; gap:12px;">
+                              <div style="display:flex; flex-direction:column; gap:6px;">
+                                  <label for="map_image" class="muted" style="font-size:13px;">Upload new map</label>
+                                  <input id="map_image"
+                                         type="file"
+                                         name="map_image"
+                                         accept=".png,.jpg,.jpeg,.webp" />
+                              </div>
 
-            <button type="submit">Add round</button>
-          </form>
-          {% if rounds %}
-          <table style="margin-top: 10px">
-            <tr>
-              <th>#</th>
-              <th>Map</th>
-              <th>Scene</th>
-              <th>Answer</th>
-              <th>Play link</th>
-              <th></th>
-            </tr>
-            {% for rd in rounds %}
-            <tr>
-              <td>{{ loop.index }}</td>
-              <td><code>{{rd.map_filename}}</code></td>
+                              <div style="display:flex; flex-direction:column; gap:6px;">
+                                  <label for="existing_map" class="muted" style="font-size:13px;">Or reuse previous map</label>
+                                  <select id="existing_map"
+                                          name="existing_map"
+                                          style="min-width:240px;">
+                                      <option value="">
+                                          {% if map_library %}Choose an uploaded map{% else %}No uploads yet{% endif %}
+                                      </option>
+                                      {% for m in map_library %}
+                                      <option value="{{m.filename}}">
+                                          {{ m.filename[:40] }}{% if m.filename|length > 40 %}...{% endif %}
+                                          ({{m.size[0]}}×{{m.size[1]}})
+                                      </option>
+                                      {% endfor %}
+                                  </select>
+                                  <span class="muted" style="font-size:12px;">
+                                      If you pick one here, the map file input is ignored.
+                                  </span>
+                              </div>
+                          </div>
 
-              <td>
-                {% if rd.scene_filename %}
-                <span
-                  class="tag"
-                  style="background: #eef4ff; border-color: #c7d7fe; color: #1d4ed8"
-                  >set</span
-                {% else %}
-                <span
-                  class="tag"
-                  style="background: #f2f4f7; border-color: #e4e7ec; color: #475467"
-                  >—</span
-                {% endif %}
+                          <!-- RIGHT: SCENE -->
+                          <div style="flex:1; min-width:280px; display:flex; flex-direction:column; gap:12px;">
+                              <div style="display:flex; flex-direction:column; gap:6px;">
+                                  <label for="scene_image" class="muted" style="font-size:13px;">Upload new scene</label>
+                                  <input id="scene_image"
+                                         type="file"
+                                         name="scene_image"
+                                         accept=".png,.jpg,.jpeg,.webp" />
+                              </div>
 
-                <form
-                  method="post"
-                  enctype="multipart/form-data"
-                  style="margin: 6px 0 0; display: flex; gap: 8px; align-items: center"
-                >
-                  <input type="hidden" name="action" value="set_scene" />
-                  <input type="hidden" name="round_id" value="{{ rd.id }}" />
-                  <input
-                    type="file"
-                    name="scene_image"
-                    accept=".png,.jpg,.jpeg,.webp"
-                    style="max-width: 190px"
-                  />
-                  <button class="btn-ghost" type="submit">Upload</button>
-                </form>
-              </td>
+                              <div style="display:flex; flex-direction:column; gap:6px;">
+                                  <label for="existing_scene" class="muted" style="font-size:13px;">Or reuse previous scene</label>
+                                  <select id="existing_scene"
+                                          name="existing_scene"
+                                          style="min-width:240px;">
+                                      <option value="">
+                                          {% if scene_library %}Choose an uploaded scene{% else %}No uploads yet{% endif %}
+                                      </option>
+                                      {% for s in scene_library %}
+                                      <option value="{{s.filename}}">
+                                          {{ s.filename[:40] }}{% if s.filename|length > 40 %}...{% endif %}
+                                          ({{s.size[0]}}×{{s.size[1]}})
+                                      </option>
+                                      {% endfor %}
+                                  </select>
+                                  <span class="muted" style="font-size:12px;">
+                                      If you pick one here, the scene file input is ignored.
+                                  </span>
+                              </div>
+                          </div>
 
-              <td>
-                {% if rd.answer_xy %}
-                <span
-                  class="tag"
-                  style="
+                      </div>
+
+                      <!-- FULL WIDTH BUTTON -->
+                      <div style="margin-top:16px">
+                          <button type="submit">Add round</button>
+                      </div>
+                  </form>
+                  {% if rounds %}
+                  <table style="margin-top: 10px">
+                      <tr>
+                          <th>#</th>
+                          <th>Map</th>
+                          <th>Scene</th>
+                          <th>Answer</th>
+                          <th>Play link</th>
+                          <th></th>
+                      </tr>
+                      {% for rd in rounds %}
+                      <tr>
+                          <td>{{ loop.index }}</td>
+                          <td><code>{{rd.map_filename}}</code></td>
+
+                          <td>
+                              {% if rd.scene_filename %}
+                              <code>{{ rd.scene_filename }}</code>
+                              {% else %}
+                              <span class="muted">—</span>
+                              {% endif %}
+                          </td>
+
+                          <td>
+                              {% if rd.answer_xy %}
+                              <span class="tag"
+                                    style="
                     background: #ecfdf3;
                     border-color: #abefc6;
                     color: #067647;
-                  "
-                  >set ✅</span
-                >
-                {% else %}
-                <span
-                  class="tag"
-                  style="
+                  ">set ✅</span>
+                              {% else %}
+                              <span class="tag"
+                                    style="
                     background: #fff1f3;
                     border-color: #fecdd6;
                     color: #b42318;
-                  "
-                  >not set</span
-                >
-                {% endif %}
-              </td>
+                  ">not set</span>
+                              {% endif %}
+                          </td>
 
-              <td>
-                <a
-                  class="tag player-link"
-                  href="{{ url_for('play_round', round_id=rd.id) }}"
-                  data-answer-set="{{ 1 if rd.answer_xy else 0 }}"
-                  data-set-url="{{ url_for('set_answer', round_id=rd.id) }}"
-                >
-                  Open play
-                </a>
-              </td>
+                          <td>
+                              <a class="tag player-link"
+                                 href="{{ url_for('play_round', round_id=rd.id) }}"
+                                 data-answer-set="{{ 1 if rd.answer_xy else 0 }}"
+                                 data-set-url="{{ url_for('set_answer', round_id=rd.id) }}">
+                                  Open play
+                              </a>
+                          </td>
 
-              <td>
-                  <div class="row" style="gap:8px; flex-wrap:nowrap;">
+                          <td>
+                              <div class="row" style="gap:8px; flex-wrap:nowrap;">
 
-                      <form method="post" style="margin:0;">
-                          <input type="hidden" name="action" value="goto_round" />
-                          <input type="hidden" name="round_index" value="{{loop.index0}}" />
-                          <button class="btn-ghost" type="submit">Open</button>
-                      </form>
+                                  <form method="post" style="margin:0;">
+                                      <input type="hidden" name="action" value="goto_round" />
+                                      <input type="hidden" name="round_index" value="{{loop.index0}}" />
+                                      <button class="btn-ghost" type="submit">Open</button>
+                                  </form>
 
-                      <form method="post" style="margin:0;">
-                          <input type="hidden" name="action" value="delete_round" />
-                          <input type="hidden" name="round_id" value="{{ rd.id }}" />
-                          <button class="btn-ghost"
-                                  type="submit"
-                                  style="color: var(--bad);"
-                                  onclick="return confirm('Delete this round? This cannot be undone.');">
-                              Delete
-                          </button>
-                      </form>
+                                  <form method="post" style="margin:0;">
+                                      <input type="hidden" name="action" value="delete_round" />
+                                      <input type="hidden" name="round_id" value="{{ rd.id }}" />
+                                      <button class="btn-ghost"
+                                              type="submit"
+                                              style="color: var(--bad);"
+                                              onclick="return confirm('Delete this round? This cannot be undone.');">
+                                          Delete
+                                      </button>
+                                  </form>
 
+                              </div>
+                          </td>
+                      </tr>
+                      {% endfor %}
+                  </table>
+                  {% else %}
+                  <p class="muted" style="margin-top: 10px">No rounds yet.</p>
+                  {% endif %}
+              </div>
+          </div>
+
+          <div class="card" style="margin-top: 14px">
+              <div class="tag">Current Round</div>
+              {% if not current %}
+              <p class="muted" style="margin-top: 10px">
+                  Add at least 1 round to start.
+              </p>
+              {% else %}
+              <div class="row"
+                   style="justify-content: space-between; margin-top: 10px">
+                  <div class="muted">
+                      Round: <code>{{round_index + 1}}</code> · Map size:
+                      <code>{{current.map_size[0]}}×{{current.map_size[1]}}</code>
                   </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </table>
-          {% else %}
-          <p class="muted" style="margin-top: 10px">No rounds yet.</p>
-          {% endif %}
-        </div>
-      </div>
+                  <div class="row">
+                      <a class="tag" href="{{url_for('set_answer', round_id=current.id)}}">Set answer</a>
 
-      <div class="card" style="margin-top: 14px">
-        <div class="tag">Current Round</div>
-        {% if not current %}
-        <p class="muted" style="margin-top: 10px">
-          Add at least 1 round to start.
-        </p>
-        {% else %}
-        <div
-          class="row"
-          style="justify-content: space-between; margin-top: 10px"
-        >
-          <div class="muted">
-            Round: <code>{{round_index + 1}}</code> · Map size:
-            <code>{{current.map_size[0]}}×{{current.map_size[1]}}</code>
-          </div>
-          <div class="row">
-            <a class="tag" href="{{url_for('set_answer', round_id=current.id)}}"
-              >Set answer</a
-            >
+                      <a class="tag player-link"
+                         href="{{ url_for('play_round', round_id=current.id) }}"
+                         data-answer-set="{{ 1 if current.answer_xy else 0 }}"
+                         data-set-url="{{ url_for('set_answer', round_id=current.id) }}">
+                          Open play
+                      </a>
+                  </div>
+              </div>
 
-            <a
-              class="tag player-link"
-              href="{{ url_for('play_round', round_id=current.id) }}"
-              data-answer-set="{{ 1 if current.answer_xy else 0 }}"
-              data-set-url="{{ url_for('set_answer', round_id=current.id) }}"
-            >
-              Open play
-            </a>
-          </div>
-        </div>
+              <div style="margin-top: 12px">
+                  <div class="muted" style="margin-bottom: 10px">
+                      Map preview (player guesses)
+                  </div>
 
-        <div style="margin-top: 12px">
-          <div class="muted" style="margin-bottom: 10px">
-            Map preview (player guesses)
-          </div>
-
-          <div
-            id="hostPreviewWrap"
-            style="
+                  <div id="hostPreviewWrap"
+                       style="
               position: relative;
               display: block;
               width: 100%;
               max-width: 1150px;
-            "
-          >
-            <img
-              id="hostPreviewImg"
-              src="{{ url_for('uploads', filename=current.map_filename) }}"
-              style="
+            ">
+                      <img id="hostPreviewImg"
+                           src="{{ url_for('uploads', filename=current.map_filename) }}"
+                           style="
                 width: 100%;
                 height: auto;
                 border-radius: 12px;
                 border: 1px solid var(--border);
-              "
-            />
+              " />
 
-            <!-- pins overlay -->
-            <svg
-              id="hostPreviewSvg"
-              style="position: absolute; inset: 0; width: 100%; height: 100%"
-            ></svg>
+                      <!-- pins overlay -->
+                      <svg id="hostPreviewSvg"
+                           style="position: absolute; inset: 0; width: 100%; height: 100%"></svg>
 
-            <!-- hover tooltip -->
-            <div
-              id="hostPreviewTooltip"
-              style="
+                      <!-- hover tooltip -->
+                      <div id="hostPreviewTooltip"
+                           style="
                 position: absolute;
                 display: none;
                 z-index: 5;
@@ -326,40 +299,34 @@
                 font-weight: 950;
                 box-shadow: 0 6px 20px rgba(16, 24, 40, 0.12);
                 pointer-events: none;
-              "
-            ></div>
-          </div>
+              "></div>
+                  </div>
 
-          <!-- send guesses to JS (player pins only) -->
-          <script type="application/json" id="hostGuessesJson">
+                  <!-- send guesses to JS (player pins only) -->
+                  <script type="application/json" id="hostGuessesJson">
             {{ (current.guesses or {}) | tojson }}
-          </script>
-        </div>
+                  </script>
+              </div>
 
-        <hr
-          style="
+              <hr style="
             border: none;
             height: 1px;
             background: var(--border);
             margin: 14px 0;
-          "
-        />
-        <form method="post" class="row">
-          <input type="hidden" name="action" value="reset_game" />
-          <button
-            class="btn-ghost"
-            type="submit"
-            onclick="return confirm('Reset players & rounds?');"
-          >
-            Reset players & rounds
-          </button>
-        </form>
-        {% endif %}
+          " />
+              <form method="post" class="row">
+                  <input type="hidden" name="action" value="reset_game" />
+                  <button class="btn-ghost"
+                          type="submit"
+                          onclick="return confirm('Reset players & rounds?');">
+                      Reset players & rounds
+                  </button>
+              </form>
+              {% endif %}
+          </div>
       </div>
-    </div>
-    <div
-      id="answerPopup"
-      style="
+      <div id="answerPopup"
+           style="
         position: fixed;
         inset: 0;
         display: none;
@@ -367,10 +334,8 @@
         justify-content: center;
         background: rgba(16, 24, 40, 0.35);
         z-index: 9999;
-      "
-    >
-      <div
-        style="
+      ">
+          <div style="
           background: white;
           padding: 20px;
           border-radius: 16px;
@@ -378,21 +343,37 @@
           width: 90%;
           border: 1px solid var(--border);
           text-align: center;
-        "
-      >
-        <h3 style="margin-top: 0">Answer not set</h3>
-        <p class="muted">You must set the answer before players can join.</p>
+        ">
+              <h3 style="margin-top: 0">Answer not set</h3>
+              <p class="muted">You must set the answer before players can join.</p>
 
-        <div style="margin-top: 14px">
-          <a id="popupSetLink" class="tag">Go to Set Answer</a>
-        </div>
+              <div style="margin-top: 14px">
+                  <a id="popupSetLink" class="tag">Go to Set Answer</a>
+              </div>
 
-        <div style="margin-top: 16px">
-          <button id="closePopup" class="btn-ghost" type="button">Close</button>
-        </div>
+              <div style="margin-top: 16px">
+                  <button id="closePopup" class="btn-ghost" type="button">Close</button>
+              </div>
+          </div>
       </div>
-    </div>
-    <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/host.js') }}"></script>
+      <script>
+          document.addEventListener("DOMContentLoaded", () => {
+              const addRoundAction = document.querySelector('input[name="action"][value="add_round"]');
+              const form = addRoundAction ? addRoundAction.closest("form") : null;
+              if (!form) return;
+
+              form.addEventListener("submit", (e) => {
+                  const existingScene = (form.querySelector('select[name="existing_scene"]')?.value || "").trim();
+                  const sceneFileCount = form.querySelector('input[name="scene_image"]')?.files?.length || 0;
+
+                  if (!existingScene && sceneFileCount === 0) {
+                      e.preventDefault();
+                      alert("Scene image is required. Upload one or reuse an existing scene.");
+                  }
+              });
+          });
+      </script>
+      <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/host.js') }}"></script>
   </body>
 </html>
