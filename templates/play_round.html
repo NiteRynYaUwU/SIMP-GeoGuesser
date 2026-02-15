@@ -1,487 +1,662 @@
 <!doctype html>
-<html><head>
-  <meta charset="utf-8" />
-  <title>Play Round {{ round_num }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root{
-      --bg:#f6f7fb; --card:#ffffff; --text:#101828; --muted:#475467;
-      --border:#e4e7ec; --accent:#2563eb; --accent2:#1d4ed8;
-      --good:#067647; --bad:#b42318; --radius:14px;
-    }
-    html, body { height: 100%; margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    body{ background: linear-gradient(180deg, #f6f7fb, #eef2ff); overflow:hidden; }
-      .stage {
-          position: relative;
-          width: 100vw;
-          height: 100vh;
-          touch-action: none;
-          z-index: 0;
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Play Round {{ round_num }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg: #f6f7fb;
+        --card: #ffffff;
+        --text: #101828;
+        --muted: #475467;
+        --border: #e4e7ec;
+        --accent: #2563eb;
+        --accent2: #1d4ed8;
+        --good: #067647;
+        --bad: #b42318;
+        --radius: 14px;
       }
-    #mapLayer{ position:absolute; left:0; top:0; right:0; bottom:0; overflow:hidden; }
-    #mapImg{
-      position:absolute; user-select:none; -webkit-user-drag:none; pointer-events:none;
-      background:white; border: 1px solid var(--border); border-radius: 12px;
-    }
-    .overlay{ position:absolute; inset:0; pointer-events:none; }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Arial,
+          sans-serif;
+      }
+      body {
+        background: linear-gradient(180deg, #f6f7fb, #eef2ff);
+        overflow: hidden;
+      }
+      .stage {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        touch-action: none;
+        z-index: 0;
+      }
+      #mapLayer {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+      }
+      #mapImg {
+        position: absolute;
+        user-select: none;
+        -webkit-user-drag: none;
+        pointer-events: none;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
+      .overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
 
       .hud {
-          position: fixed;
-          top: 14px;
-          left: 14px;
-          right: 14px;
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-          align-items: center;
-          padding: 10px 12px;
-          background: var(--card);
-          border-radius: 14px;
-          border: 1px solid var(--border);
-          z-index: 99999; /* FORCE above everything */
-          pointer-events: auto; /* FORCE clickable */
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        right: 14px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 10px 12px;
+        background: var(--card);
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        z-index: 99999; /* FORCE above everything */
+        pointer-events: auto; /* FORCE clickable */
       }
-          .hud * {
-              pointer-events: auto;
-          }
+      .hud * {
+        pointer-events: auto;
+      }
       /* ensure links/buttons clickable */
-    .roundTitle{
-      font-size: 13px;
-      font-weight: 950;
-      color: var(--text);
-    }
-    .navbtn{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding: 9px 11px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: white;
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 950;
-      font-size: 14px;
-      cursor: pointer;
-      pointer-events: auto; /* IMPORTANT because .hud sits above .overlay which has pointer-events:none */
-    }
-    .navbtn:hover{ background:#f2f4f7; text-decoration:none; }
-    .navbtn.disabled{
-      opacity: .45;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
+      .roundTitle {
+        font-size: 13px;
+        font-weight: 950;
+        color: var(--text);
+      }
+      .navbtn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 11px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 950;
+        font-size: 14px;
+        cursor: pointer;
+        pointer-events: auto; /* IMPORTANT because .hud sits above .overlay which has pointer-events:none */
+      }
+      .navbtn:hover {
+        background: #f2f4f7;
+        text-decoration: none;
+      }
+      .navbtn.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
 
-    .group{ display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
-    label{ font-size: 12px; color: var(--muted); font-weight:900; }
-    select, input{
-      padding: 9px 10px; border-radius: 12px; border: 1px solid var(--border);
-      background: white; color: var(--text); outline:none; font-size: 14px;
-    }
-    input::placeholder{color:#98a2b3;}
-    button{
-      padding: 9px 11px; border-radius: 12px; border: 1px solid var(--border);
-      background: var(--accent); color: white; cursor: pointer; font-weight: 950; font-size: 14px;
-    }
-    button:hover{background: var(--accent2);}
-    .btn-ghost{ background: white; color: var(--text); }
-    .btn-ghost:hover{ background:#f2f4f7; }
-    .pill{
-      display:inline-flex; gap:8px; align-items:center; padding: 7px 10px; border-radius: 999px;
-      background: #f2f4f7; border: 1px solid var(--border); color: var(--muted); font-size: 13px; font-weight:900;
-    }
-    a { color: var(--accent); text-decoration: none; font-size: 13px; font-weight: 950; }
-    a:hover { text-decoration: underline; }
-    .spacer { flex: 1; }
-    .hint{
-      position: fixed; bottom: 14px; left: 14px; right: 14px;
-      display:flex; justify-content:center; pointer-events:none; z-index: 9;
-    }
-    .hint .chip{
-      background: var(--card); border: 1px solid var(--border); border-radius: 999px;
-      padding: 8px 12px; color: var(--muted); font-size: 13px; font-weight: 900;
-    }
-    .toast{
-      position: fixed; top: 86px; left: 50%; transform: translateX(-50%);
-      padding: 10px 12px; border-radius: 12px; background: var(--card);
-      border: 1px solid var(--border); font-weight: 950; color: var(--text);
-      display:none; z-index: 20;
-    }
-  </style>
-</head><body>
-
-  <div class="stage" id="stage">
-    <div id="mapLayer">
-      <img id="mapImg" src="{{url_for('uploads', filename=map_fn)}}" alt="Map" />
+      .group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      label {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 900;
+      }
+      select,
+      input {
+        padding: 9px 10px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--text);
+        outline: none;
+        font-size: 14px;
+      }
+      input::placeholder {
+        color: #98a2b3;
+      }
+      button {
+        padding: 9px 11px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: var(--accent);
+        color: white;
+        cursor: pointer;
+        font-weight: 950;
+        font-size: 14px;
+      }
+      button:hover {
+        background: var(--accent2);
+      }
+      .btn-ghost {
+        background: white;
+        color: var(--text);
+      }
+      .btn-ghost:hover {
+        background: #f2f4f7;
+      }
+      .pill {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: #f2f4f7;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 900;
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 950;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .spacer {
+        flex: 1;
+      }
+      .hint {
+        position: fixed;
+        bottom: 14px;
+        left: 14px;
+        right: 14px;
+        display: flex;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 9;
+      }
+      .hint .chip {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 8px 12px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 900;
+      }
+      .toast {
+        position: fixed;
+        top: 86px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        font-weight: 950;
+        color: var(--text);
+        display: none;
+        z-index: 20;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage" id="stage">
+      <div id="mapLayer">
+        <img
+          id="mapImg"
+          src="{{url_for('uploads', filename=map_fn)}}"
+          alt="Map"
+        />
+      </div>
+      <svg id="overlay" class="overlay"></svg>
     </div>
-    <svg id="overlay" class="overlay"></svg>
-  </div>
 
-  <div class="hud">
-        <!-- Round header + navigation -->
-    <div class="group">
-      <span class="roundTitle">Round {{ round_num }} / {{ total_rounds }}</span>
+    <div class="hud">
+      <!-- Round header + navigation -->
+      <div class="group">
+        <span class="roundTitle"
+          >Round {{ round_num }} / {{ total_rounds }}</span
+        >
 
-      {% if prev_round_id %}
-        <a class="navbtn" href="{{ url_for('play_round', round_id=prev_round_id) }}">← Prev</a>
-      {% else %}
+        {% if prev_round_id %}
+        <a
+          class="navbtn"
+          href="{{ url_for('play_round', round_id=prev_round_id) }}"
+          >← Prev</a
+        >
+        {% else %}
         <span class="navbtn disabled">← Prev</span>
-      {% endif %}
-
-      {% if next_round_id %}
-        <a class="navbtn" href="{{ url_for('play_round', round_id=next_round_id) }}">Next →</a>
-      {% else %}
+        {% endif %} {% if next_round_id %}
+        <a
+          class="navbtn"
+          href="{{ url_for('play_round', round_id=next_round_id) }}"
+          >Next →</a
+        >
+        {% else %}
         <span class="navbtn disabled">Next →</span>
-      {% endif %}
+        {% endif %}
+      </div>
+
+      <div class="group">
+        <label for="player">Player</label>
+        <select id="player"></select>
+        <span class="pill" id="guessedPill">Guessed: 0 / 0</span>
+        <span class="pill" id="pinStatus">Pin: —</span>
+      </div>
+
+      <div class="group">
+        <button class="btn-ghost" id="zoomOut" title="Zoom out">−</button>
+        <button class="btn-ghost" id="zoomIn" title="Zoom in">+</button>
+        <button class="btn-ghost" id="resetView" title="Reset view">
+          Reset
+        </button>
+        <span class="pill" id="zoomPill">100%</span>
+      </div>
+
+      <div class="group">
+        <form
+          id="addPlayerForm"
+          style="display: flex; gap: 8px; align-items: center; margin: 0"
+        >
+          <input id="newPlayer" placeholder="Add player…" />
+          <button type="submit">Add</button>
+        </form>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="group">
+        <a href="{{url_for('leaderboard')}}">Leaderboard</a>
+        <a href="{{url_for('host')}}">Host</a>
+      </div>
     </div>
 
-    <div class="group">
-      <label for="player">Player</label>
-      <select id="player"></select>
-      <span class="pill" id="guessedPill">Guessed: 0 / 0</span>
-      <span class="pill" id="pinStatus">Pin: —</span>
+    <div class="hint">
+      <div class="chip">
+        Drag to pan · Mouse wheel / buttons to zoom · Click (no drag) to place
+        pin
+      </div>
     </div>
 
-    <div class="group">
-      <button class="btn-ghost" id="zoomOut" title="Zoom out">−</button>
-      <button class="btn-ghost" id="zoomIn" title="Zoom in">+</button>
-      <button class="btn-ghost" id="resetView" title="Reset view">Reset</button>
-      <span class="pill" id="zoomPill">100%</span>
-    </div>
+    <div class="toast" id="toast"></div>
 
-    <div class="group">
-      <form id="addPlayerForm" style="display:flex; gap:8px; align-items:center; margin:0;">
-        <input id="newPlayer" placeholder="Add player…" />
-        <button type="submit">Add</button>
-      </form>
-    </div>
+    <script>
+      const roundId = "{{ round_id }}";
+      const stateKey = "lgeoparty.selectedPlayer." + roundId;
 
-    <div class="spacer"></div>
+      const stage = document.getElementById("stage");
+      const img = document.getElementById("mapImg");
+      const overlay = document.getElementById("overlay");
 
-    <div class="group">
-      <a href="{{url_for('leaderboard')}}">Leaderboard</a>
-      <a href="{{url_for('host')}}">Host</a>
-    </div>
-  </div>
+      const playerSel = document.getElementById("player");
+      const pinStatus = document.getElementById("pinStatus");
+      const guessedPill = document.getElementById("guessedPill");
 
-  <div class="hint">
-    <div class="chip">Drag to pan · Mouse wheel / buttons to zoom · Click (no drag) to place pin</div>
-  </div>
+      const addPlayerForm = document.getElementById("addPlayerForm");
+      const newPlayerInput = document.getElementById("newPlayer");
 
-  <div class="toast" id="toast"></div>
+      const zoomInBtn = document.getElementById("zoomIn");
+      const zoomOutBtn = document.getElementById("zoomOut");
+      const resetBtn = document.getElementById("resetView");
+      const zoomPill = document.getElementById("zoomPill");
 
-<script>
-const roundId = "{{ round_id }}";
-const stateKey = "lgeoparty.selectedPlayer." + roundId;
+      const toast = document.getElementById("toast");
 
-const stage = document.getElementById("stage");
-const img = document.getElementById("mapImg");
-const overlay = document.getElementById("overlay");
+      document
+        .querySelector(".hud")
+        ?.addEventListener("pointerdown", (e) => e.stopPropagation());
+      document
+        .querySelector(".hud")
+        ?.addEventListener("click", (e) => e.stopPropagation());
 
-const playerSel = document.getElementById("player");
-const pinStatus = document.getElementById("pinStatus");
-const guessedPill = document.getElementById("guessedPill");
+      let players = [];
+      let guesses = {};
 
-const addPlayerForm = document.getElementById("addPlayerForm");
-const newPlayerInput = document.getElementById("newPlayer");
+      // View state
+      let baseScale = 1; // contain scale
+      let zoom = 1; // user zoom multiplier
+      let panX = 0; // pixels
+      let panY = 0;
 
-const zoomInBtn = document.getElementById("zoomIn");
-const zoomOutBtn = document.getElementById("zoomOut");
-const resetBtn = document.getElementById("resetView");
-const zoomPill = document.getElementById("zoomPill");
+      function clamp(v, lo, hi) {
+        return Math.max(lo, Math.min(hi, v));
+      }
 
-const toast = document.getElementById("toast");
+      function showToast(text, isError = false) {
+        toast.textContent = text;
+        toast.style.display = "block";
+        toast.style.color = isError ? "var(--bad)" : "var(--text)";
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => {
+          toast.style.display = "none";
+        }, 1400);
+      }
 
-document.querySelector(".hud")?.addEventListener("pointerdown", (e) => e.stopPropagation());
-document.querySelector(".hud")?.addEventListener("click", (e) => e.stopPropagation());
+      function clearOverlay() {
+        while (overlay.firstChild) overlay.removeChild(overlay.firstChild);
+      }
+      function setOverlaySize() {
+        overlay.setAttribute("width", window.innerWidth);
+        overlay.setAttribute("height", window.innerHeight);
+      }
 
-let players = [];
-let guesses = {};
+      function computeBaseScale() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const iw = img.naturalWidth || 1;
+        const ih = img.naturalHeight || 1;
+        baseScale = Math.min(vw / iw, vh / ih);
+      }
 
-// View state
-let baseScale = 1; // contain scale
-let zoom = 1;      // user zoom multiplier
-let panX = 0;      // pixels
-let panY = 0;
+      function currentRenderSize() {
+        const iw = img.naturalWidth || 1;
+        const ih = img.naturalHeight || 1;
+        const s = baseScale * zoom;
+        return { w: iw * s, h: ih * s, s };
+      }
 
-function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+      function imageTopLeft() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const { w, h } = currentRenderSize();
+        const left = (vw - w) / 2 + panX;
+        const top = (vh - h) / 2 + panY;
+        return { left, top };
+      }
 
-function showToast(text, isError=false){
-  toast.textContent = text;
-  toast.style.display = "block";
-  toast.style.color = isError ? "var(--bad)" : "var(--text)";
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => { toast.style.display = "none"; }, 1400);
-}
+      function layoutImage() {
+        if (!img.naturalWidth) return;
+        computeBaseScale();
+        const { w, h } = currentRenderSize();
+        const { left, top } = imageTopLeft();
+        img.style.width = w + "px";
+        img.style.height = h + "px";
+        img.style.left = left + "px";
+        img.style.top = top + "px";
+        zoomPill.textContent = Math.round(zoom * 100) + "%";
+        setOverlaySize();
+        refreshPin();
+      }
 
-function clearOverlay(){ while (overlay.firstChild) overlay.removeChild(overlay.firstChild); }
-function setOverlaySize(){ overlay.setAttribute("width", window.innerWidth); overlay.setAttribute("height", window.innerHeight); }
+      function screenToImageCoords(clientX, clientY) {
+        const { left, top } = imageTopLeft();
+        const { s } = currentRenderSize();
+        return { x: (clientX - left) / s, y: (clientY - top) / s };
+      }
 
-function computeBaseScale(){
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const iw = img.naturalWidth || 1;
-  const ih = img.naturalHeight || 1;
-  baseScale = Math.min(vw / iw, vh / ih);
-}
+      function imageToScreenCoords(x, y) {
+        const { left, top } = imageTopLeft();
+        const { s } = currentRenderSize();
+        return { sx: left + x * s, sy: top + y * s };
+      }
 
-function currentRenderSize(){
-  const iw = img.naturalWidth || 1;
-  const ih = img.naturalHeight || 1;
-  const s = baseScale * zoom;
-  return {w: iw * s, h: ih * s, s};
-}
+      function drawPinForPlayer(player) {
+        clearOverlay();
+        const g = guesses[player];
+        if (!g) {
+          pinStatus.textContent = "Pin: —";
+          return;
+        }
+        pinStatus.textContent = "Pin: shown";
+        const p = imageToScreenCoords(g.x, g.y);
 
-function imageTopLeft(){
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const {w, h} = currentRenderSize();
-  const left = (vw - w) / 2 + panX;
-  const top = (vh - h) / 2 + panY;
-  return {left, top};
-}
+        const group = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "g",
+        );
 
-function layoutImage(){
-  if(!img.naturalWidth) return;
-  computeBaseScale();
-  const {w, h} = currentRenderSize();
-  const {left, top} = imageTopLeft();
-  img.style.width = w + "px";
-  img.style.height = h + "px";
-  img.style.left = left + "px";
-  img.style.top = top + "px";
-  zoomPill.textContent = Math.round(zoom * 100) + "%";
-  setOverlaySize();
-  refreshPin();
-}
+        const outer = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle",
+        );
+        outer.setAttribute("cx", p.sx);
+        outer.setAttribute("cy", p.sy);
+        outer.setAttribute("r", 11);
+        outer.setAttribute("fill", "rgba(255,255,255,0.95)");
+        outer.setAttribute("stroke", "rgba(16,24,40,0.25)");
+        outer.setAttribute("stroke-width", 2);
 
-function screenToImageCoords(clientX, clientY){
-  const {left, top} = imageTopLeft();
-  const {s} = currentRenderSize();
-  return {x: (clientX - left) / s, y: (clientY - top) / s};
-}
+        const inner = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "circle",
+        );
+        inner.setAttribute("cx", p.sx);
+        inner.setAttribute("cy", p.sy);
+        inner.setAttribute("r", 4);
+        inner.setAttribute("fill", "rgba(37,99,235,0.98)");
+        inner.setAttribute("stroke", "rgba(16,24,40,0.18)");
+        inner.setAttribute("stroke-width", 1);
 
-function imageToScreenCoords(x, y){
-  const {left, top} = imageTopLeft();
-  const {s} = currentRenderSize();
-  return {sx: left + x * s, sy: top + y * s};
-}
+        const tail = document.createElementNS(
+          "http://www.w3.org/2000/svg",
+          "path",
+        );
+        const d = `M ${p.sx} ${p.sy + 11} L ${p.sx - 6} ${p.sy + 25} L ${p.sx + 6} ${p.sy + 25} Z`;
+        tail.setAttribute("d", d);
+        tail.setAttribute("fill", "rgba(255,255,255,0.95)");
+        tail.setAttribute("stroke", "rgba(16,24,40,0.25)");
+        tail.setAttribute("stroke-width", 2);
 
-function drawPinForPlayer(player){
-  clearOverlay();
-  const g = guesses[player];
-  if(!g){
-    pinStatus.textContent = "Pin: —";
-    return;
-  }
-  pinStatus.textContent = "Pin: shown";
-  const p = imageToScreenCoords(g.x, g.y);
+        group.appendChild(tail);
+        group.appendChild(outer);
+        group.appendChild(inner);
+        overlay.appendChild(group);
+      }
 
-  const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      function refreshPin() {
+        drawPinForPlayer(playerSel.value);
+      }
 
-  const outer = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  outer.setAttribute("cx", p.sx);
-  outer.setAttribute("cy", p.sy);
-  outer.setAttribute("r", 11);
-  outer.setAttribute("fill", "rgba(255,255,255,0.95)");
-  outer.setAttribute("stroke", "rgba(16,24,40,0.25)");
-  outer.setAttribute("stroke-width", 2);
+      function computeGuessStats() {
+        const guessedCount = Object.keys(guesses).length;
+        guessedPill.textContent = `Guessed: ${guessedCount} / ${players.length}`;
+      }
 
-  const inner = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  inner.setAttribute("cx", p.sx);
-  inner.setAttribute("cy", p.sy);
-  inner.setAttribute("r", 4);
-  inner.setAttribute("fill", "rgba(37,99,235,0.98)");
-  inner.setAttribute("stroke", "rgba(16,24,40,0.18)");
-  inner.setAttribute("stroke-width", 1);
+      function rebuildPlayerDropdown(keepSelection) {
+        const prev = keepSelection ?? playerSel.value ?? "";
+        playerSel.innerHTML = "";
+        for (const p of players) {
+          const opt = document.createElement("option");
+          opt.value = p;
+          opt.textContent = p + (guesses[p] ? " ✅" : "");
+          playerSel.appendChild(opt);
+        }
+        let selected = prev || localStorage.getItem(stateKey) || "";
+        if (selected && players.includes(selected)) {
+          playerSel.value = selected;
+        } else if (players.length) {
+          playerSel.value = players[0];
+        }
+        localStorage.setItem(stateKey, playerSel.value);
+        computeGuessStats();
+        refreshPin();
+      }
 
-  const tail = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  const d = `M ${p.sx} ${p.sy+11} L ${p.sx-6} ${p.sy+25} L ${p.sx+6} ${p.sy+25} Z`;
-  tail.setAttribute("d", d);
-  tail.setAttribute("fill", "rgba(255,255,255,0.95)");
-  tail.setAttribute("stroke", "rgba(16,24,40,0.25)");
-  tail.setAttribute("stroke-width", 2);
+      async function loadState() {
+        const res = await fetch(`/api/round_state/${roundId}`);
+        const js = await res.json();
+        players = js.players || [];
+        guesses = js.guesses || {};
+        rebuildPlayerDropdown();
+      }
 
-  group.appendChild(tail);
-  group.appendChild(outer);
-  group.appendChild(inner);
-  overlay.appendChild(group);
-}
+      playerSel.addEventListener("change", () => {
+        localStorage.setItem(stateKey, playerSel.value);
+        refreshPin();
+      });
 
-function refreshPin(){ drawPinForPlayer(playerSel.value); }
+      // When adding a player, switch to them immediately (prevents overwriting others)
+      addPlayerForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = (newPlayerInput.value || "").trim();
+        if (!name) {
+          showToast("Name cannot be empty.", true);
+          return;
+        }
+        try {
+          const res = await fetch("/api/add_player", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name }),
+          });
+          const js = await res.json();
+          if (!res.ok || !js.ok) {
+            showToast(js.error || "Failed to add.", true);
+            return;
+          }
+          players = js.players;
+          newPlayerInput.value = "";
+          rebuildPlayerDropdown(js.added);
+          showToast(`Turn: ${js.added}`);
+        } catch (err) {
+          showToast("Network error", true);
+        }
+      });
 
-function computeGuessStats(){
-  const guessedCount = Object.keys(guesses).length;
-  guessedPill.textContent = `Guessed: ${guessedCount} / ${players.length}`;
-}
+      // Zoom controls
+      function zoomAt(clientX, clientY, newZoom) {
+        newZoom = clamp(newZoom, 0.5, 6.0);
+        if (!img.naturalWidth) return;
 
-function rebuildPlayerDropdown(keepSelection){
-  const prev = keepSelection ?? playerSel.value ?? "";
-  playerSel.innerHTML = "";
-  for(const p of players){
-    const opt = document.createElement("option");
-    opt.value = p;
-    opt.textContent = p + (guesses[p] ? " ✅" : "");
-    playerSel.appendChild(opt);
-  }
-  let selected = prev || localStorage.getItem(stateKey) || "";
-  if(selected && players.includes(selected)){
-    playerSel.value = selected;
-  }else if(players.length){
-    playerSel.value = players[0];
-  }
-  localStorage.setItem(stateKey, playerSel.value);
-  computeGuessStats();
-  refreshPin();
-}
+        const before = screenToImageCoords(clientX, clientY);
+        zoom = newZoom;
 
-async function loadState(){
-  const res = await fetch(`/api/round_state/${roundId}`);
-  const js = await res.json();
-  players = js.players || [];
-  guesses = js.guesses || {};
-  rebuildPlayerDropdown();
-}
+        const vw = window.innerWidth,
+          vh = window.innerHeight;
+        computeBaseScale();
+        const iw = img.naturalWidth,
+          ih = img.naturalHeight;
+        const s = baseScale * zoom;
 
-playerSel.addEventListener("change", () => {
-  localStorage.setItem(stateKey, playerSel.value);
-  refreshPin();
-});
+        const desiredLeft = clientX - before.x * s;
+        const desiredTop = clientY - before.y * s;
 
-// When adding a player, switch to them immediately (prevents overwriting others)
-addPlayerForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = (newPlayerInput.value || "").trim();
-  if(!name){
-    showToast("Name cannot be empty.", true);
-    return;
-  }
-  try{
-    const res = await fetch("/api/add_player", {
-      method:"POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({name})
-    });
-    const js = await res.json();
-    if(!res.ok || !js.ok){
-      showToast(js.error || "Failed to add.", true);
-      return;
-    }
-    players = js.players;
-    newPlayerInput.value = "";
-    rebuildPlayerDropdown(js.added);
-    showToast(`Turn: ${js.added}`);
-  }catch(err){
-    showToast("Network error", true);
-  }
-});
+        panX = desiredLeft - (vw - iw * s) / 2;
+        panY = desiredTop - (vh - ih * s) / 2;
 
-// Zoom controls
-function zoomAt(clientX, clientY, newZoom){
-  newZoom = clamp(newZoom, 0.5, 6.0);
-  if(!img.naturalWidth) return;
+        layoutImage();
+      }
 
-  const before = screenToImageCoords(clientX, clientY);
-  zoom = newZoom;
+      zoomInBtn.addEventListener("click", () =>
+        zoomAt(window.innerWidth / 2, window.innerHeight / 2, zoom * 1.2),
+      );
+      zoomOutBtn.addEventListener("click", () =>
+        zoomAt(window.innerWidth / 2, window.innerHeight / 2, zoom / 1.2),
+      );
+      resetBtn.addEventListener("click", () => {
+        zoom = 1;
+        panX = 0;
+        panY = 0;
+        layoutImage();
+      });
 
-  const vw = window.innerWidth, vh = window.innerHeight;
-  computeBaseScale();
-  const iw = img.naturalWidth, ih = img.naturalHeight;
-  const s = baseScale * zoom;
+      stage.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+          const factor = Math.exp(-e.deltaY * 0.0012);
+          zoomAt(e.clientX, e.clientY, zoom * factor);
+        },
+        { passive: false },
+      );
 
-  const desiredLeft = clientX - before.x * s;
-  const desiredTop  = clientY - before.y * s;
+      // Pan + click-to-guess (no drag)
+      let pointerDown = false;
+      let startX = 0,
+        startY = 0;
+      let startPanX = 0,
+        startPanY = 0;
+      let moved = false;
 
-  panX = desiredLeft - (vw - iw * s) / 2;
-  panY = desiredTop  - (vh - ih * s) / 2;
+      stage.addEventListener("pointerdown", (e) => {
+        // ✅ If you clicked anything inside the HUD, do NOT start pan/capture
+        if (e.target.closest(".hud")) return;
 
-  layoutImage();
-}
+        pointerDown = true;
+        moved = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        startPanX = panX;
+        startPanY = panY;
+        stage.setPointerCapture(e.pointerId);
+      });
 
-zoomInBtn.addEventListener("click", () => zoomAt(window.innerWidth/2, window.innerHeight/2, zoom * 1.2));
-zoomOutBtn.addEventListener("click", () => zoomAt(window.innerWidth/2, window.innerHeight/2, zoom / 1.2));
-resetBtn.addEventListener("click", () => { zoom = 1; panX = 0; panY = 0; layoutImage(); });
+      stage.addEventListener("pointermove", (e) => {
+        if (!pointerDown) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (Math.hypot(dx, dy) > 6) moved = true;
+        panX = startPanX + dx;
+        panY = startPanY + dy;
+        layoutImage();
+      });
 
-stage.addEventListener("wheel", (e) => {
-  e.preventDefault();
-  const factor = Math.exp(-e.deltaY * 0.0012);
-  zoomAt(e.clientX, e.clientY, zoom * factor);
-}, {passive:false});
+      stage.addEventListener("pointerup", async (e) => {
+        if (!pointerDown) return;
+        pointerDown = false;
+        stage.releasePointerCapture(e.pointerId);
 
-// Pan + click-to-guess (no drag)
-let pointerDown = false;
-let startX = 0, startY = 0;
-let startPanX = 0, startPanY = 0;
-let moved = false;
+        if (moved) return;
 
-stage.addEventListener("pointerdown", (e) => {
-    // ✅ If you clicked anything inside the HUD, do NOT start pan/capture
-    if (e.target.closest(".hud")) return;
+        if (!players.length) {
+          showToast("Add at least one player first.", true);
+          return;
+        }
 
-    pointerDown = true;
-    moved = false;
-    startX = e.clientX;
-    startY = e.clientY;
-    startPanX = panX;
-    startPanY = panY;
-    stage.setPointerCapture(e.pointerId);
-});
+        const coords = screenToImageCoords(e.clientX, e.clientY);
+        const iw = img.naturalWidth,
+          ih = img.naturalHeight;
+        const x = clamp(Math.round(coords.x), 0, iw);
+        const y = clamp(Math.round(coords.y), 0, ih);
 
-stage.addEventListener("pointermove", (e) => {
-  if(!pointerDown) return;
-  const dx = e.clientX - startX;
-  const dy = e.clientY - startY;
-  if(Math.hypot(dx, dy) > 6) moved = true;
-  panX = startPanX + dx;
-  panY = startPanY + dy;
-  layoutImage();
-});
+        const player = playerSel.value;
+        localStorage.setItem(stateKey, player);
 
-stage.addEventListener("pointerup", async (e) => {
-  if(!pointerDown) return;
-  pointerDown = false;
-  stage.releasePointerCapture(e.pointerId);
+        try {
+          const res = await fetch("/api/guess", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ round_id: roundId, player, x, y }),
+          });
+          const js = await res.json();
+          if (!res.ok || !js.ok) {
+            showToast(js.error || "Failed to save guess.", true);
+            return;
+          }
+          guesses = js.guesses || guesses;
+          rebuildPlayerDropdown(player);
+          showToast("Saved");
+        } catch (err) {
+          showToast("Network error", true);
+        }
+      });
 
-  if(moved) return;
-
-  if(!players.length){
-    showToast("Add at least one player first.", true);
-    return;
-  }
-
-  const coords = screenToImageCoords(e.clientX, e.clientY);
-  const iw = img.naturalWidth, ih = img.naturalHeight;
-  const x = clamp(Math.round(coords.x), 0, iw);
-  const y = clamp(Math.round(coords.y), 0, ih);
-
-  const player = playerSel.value;
-  localStorage.setItem(stateKey, player);
-
-  try{
-    const res = await fetch("/api/guess", {
-      method:"POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({round_id: roundId, player, x, y})
-    });
-    const js = await res.json();
-    if(!res.ok || !js.ok){
-      showToast(js.error || "Failed to save guess.", true);
-      return;
-    }
-    guesses = js.guesses || guesses;
-    rebuildPlayerDropdown(player);
-    showToast("Saved");
-  }catch(err){
-    showToast("Network error", true);
-  }
-});
-
-img.addEventListener("load", () => {
-  zoom = 1; panX = 0; panY = 0;
-  layoutImage();
-  loadState();
-});
-window.addEventListener("resize", () => layoutImage());
-</script>
-
-</body></html>
+      img.addEventListener("load", () => {
+        zoom = 1;
+        panX = 0;
+        panY = 0;
+        layoutImage();
+        loadState();
+      });
+      window.addEventListener("resize", () => layoutImage());
+    </script>
+  </body>
+</html>
