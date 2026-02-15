@@ -23,16 +23,24 @@
 
     <div class="hud">
       <div class="group">
-        <span class="roundTitle">Round {{ round_num }} / {{ total_rounds }}</span>
+        <span class="roundTitle"
+          >Round {{ round_num }} / {{ total_rounds }}</span
+        >
 
         {% if prev_round_id %}
-        <a class="navbtn" href="{{ url_for('play_round', round_id=prev_round_id) }}">← Prev</a>
+        <a
+          class="navbtn"
+          href="{{ url_for('play_round', round_id=prev_round_id) }}"
+          >← Prev</a
+        >
         {% else %}
         <span class="navbtn disabled">← Prev</span>
-        {% endif %}
-
-        {% if next_round_id %}
-        <a class="navbtn" href="{{ url_for('play_round', round_id=next_round_id) }}">Next →</a>
+        {% endif %} {% if next_round_id %}
+        <a
+          class="navbtn"
+          href="{{ url_for('play_round', round_id=next_round_id) }}"
+          >Next →</a
+        >
         {% else %}
         <span class="navbtn disabled">Next →</span>
         {% endif %}
@@ -48,12 +56,17 @@
       <div class="group">
         <button class="btn-ghost" id="zoomOut" title="Zoom out">−</button>
         <button class="btn-ghost" id="zoomIn" title="Zoom in">+</button>
-        <button class="btn-ghost" id="resetView" title="Reset view">Reset</button>
+        <button class="btn-ghost" id="resetView" title="Reset view">
+          Reset
+        </button>
         <span class="pill" id="zoomPill">100%</span>
       </div>
 
       <div class="group">
-        <form id="addPlayerForm" style="display:flex; gap:8px; align-items:center; margin:0;">
+        <form
+          id="addPlayerForm"
+          style="display: flex; gap: 8px; align-items: center; margin: 0"
+        >
           <input id="newPlayer" placeholder="Add player…" />
           <button type="submit">Add</button>
         </form>
@@ -68,7 +81,10 @@
     </div>
 
     <div class="hint">
-      <div class="chip">Drag to pan · Mouse wheel / buttons to zoom · Click (no drag) to place pin</div>
+      <div class="chip">
+        Drag to pan · Mouse wheel / buttons to zoom · Click (no drag) to place
+        pin
+      </div>
     </div>
 
     <div class="toast" id="toast"></div>
