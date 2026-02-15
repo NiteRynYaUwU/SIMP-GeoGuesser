@@ -1,0 +1,123 @@
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #101828;
+  --muted: #475467;
+  --border: #e4e7ec;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --good: #067647;
+  --bad: #b42318;
+  --radius: 14px;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: linear-gradient(180deg, #f6f7fb, #eef2ff);
+  padding: 24px 18px;
+}
+
+.wrap {
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 950;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1px solid var(--border);
+  margin: 12px 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 10px 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 14px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+img {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.pinwrap {
+  width: 100%;
+  max-width: 1150px;
+}
+
+.pinmap {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+code {
+  background: #f2f4f7;
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--accent);
+  color: white;
+  font-weight: 900;
+}
+
+.btn:hover {
+  background: var(--accent2);
+  text-decoration: none;
+}
+
+.btn-ghost {
+  background: white;
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  background: #f2f4f7;
+}

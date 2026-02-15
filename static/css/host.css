@@ -1,0 +1,151 @@
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #101828;
+  --muted: #475467;
+  --border: #e4e7ec;
+  --accent: #2563eb;
+  --accent2: #1d4ed8;
+  --good: #067647;
+  --bad: #b42318;
+  --radius: 14px;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: linear-gradient(180deg, #f6f7fb, #eef2ff);
+  padding: 24px 18px;
+}
+
+.wrap {
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0 0 6px 0;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px;
+  border: 1px solid var(--border);
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+input,
+select {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--text);
+  outline: none;
+}
+
+input::placeholder {
+  color: #98a2b3;
+}
+
+button {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+button:hover {
+  background: var(--accent2);
+}
+
+.btn-ghost {
+  background: white;
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  background: #f2f4f7;
+}
+
+.err {
+  color: var(--bad);
+  margin: 10px 0 0 0;
+  font-weight: 700;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 10px 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 14px;
+}
+
+code {
+  background: #f2f4f7;
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.tag {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 800;
+  font-size: 12px;
+  border: 1px solid #dbeafe;
+}
+
+img {
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 900;
+}
+
+a:hover {
+  text-decoration: underline;
+}
