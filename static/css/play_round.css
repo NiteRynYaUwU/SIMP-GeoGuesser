@@ -1,21 +1,6 @@
-:root {
-  --bg: #f6f7fb;
-  --card: #ffffff;
-  --text: #101828;
-  --muted: #475467;
-  --border: #e4e7ec;
-  --accent: #2563eb;
-  --accent2: #1d4ed8;
-  --good: #067647;
-  --bad: #b42318;
-  --radius: 14px;
-}
-
 html,
 body {
   height: 100%;
-  margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 body {
