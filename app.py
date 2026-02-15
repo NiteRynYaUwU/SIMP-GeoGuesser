@@ -411,30 +411,8 @@ def leaderboard():
 
 @app.route("/r/<round_id>")
 def public_round(round_id):
-    rd = get_round(round_id)
-
-    # Find this round's index
-    try:
-        idx = STATE.rounds.index(rd)
-    except ValueError:
-        abort(404)
-
-    total = len(STATE.rounds)
-    round_num = idx + 1
-
-    prev_round_id = STATE.rounds[idx - 1].id if idx > 0 else None
-    next_round_id = STATE.rounds[idx + 1].id if idx < total - 1 else None
-
-    return render_template(
-        "play_round.html",
-        map_fn=rd.map_filename,
-        round_id=round_id,
-        round_num=round_num,
-        total_rounds=total,
-        prev_round_id=prev_round_id,
-        next_round_id=next_round_id,
-        answer_set=(rd.answer_xy is not None),
-    )
+    # Keep the short URL but reuse the main play view to avoid duplicate logic.
+    return redirect(url_for("play_round", round_id=round_id))
 
 if __name__ == "__main__":
     print(f"Running on http://{APP_HOST}:{APP_PORT}")
