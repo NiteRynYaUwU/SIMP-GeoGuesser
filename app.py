@@ -43,6 +43,8 @@ class GameState:
 
 STATE = GameState()
 
+IMAGE_SIZE_CACHE: Dict[str, Tuple[float, Tuple[int, int]]] = {}
+
 
 # -----------------------------
 # Helpers
@@ -50,6 +52,45 @@ STATE = GameState()
 def ext_ok(filename: str) -> bool:
     _, ext = os.path.splitext(filename.lower())
     return ext in ALLOWED_EXT
+
+
+def get_image_size(path: str) -> Tuple[int, int]:
+    """
+    Read image dimensions with a tiny mtime-aware cache to avoid reopening files.
+    """
+    stat = os.stat(path)
+    cache = IMAGE_SIZE_CACHE.get(path)
+    if cache and cache[0] == stat.st_mtime:
+        return cache[1]
+
+    with Image.open(path) as im:
+        size = im.size
+
+    IMAGE_SIZE_CACHE[path] = (stat.st_mtime, size)
+    return size
+
+
+def list_map_library() -> List[Dict[str, object]]:
+    """
+    Return all uploaded maps (already on disk) with their dimensions.
+    Used to let hosts reuse images across rounds.
+    """
+    items: List[Dict[str, object]] = []
+    if not os.path.isdir(UPLOAD_DIR):
+        return items
+
+    for name in sorted(os.listdir(UPLOAD_DIR)):
+        if not ext_ok(name):
+            continue
+        path = os.path.join(UPLOAD_DIR, name)
+        if not os.path.isfile(path):
+            continue
+        try:
+            size = get_image_size(path)
+        except Exception:
+            continue
+        items.append({"filename": name, "size": size})
+    return items
 
 
 def normalize_player_name(name: str) -> str:
@@ -66,11 +107,32 @@ def save_upload(file_storage) -> str:
         raise ValueError("No file selected.")
     if not ext_ok(file_storage.filename):
         raise ValueError("Unsupported file type. Use png/jpg/jpeg/webp.")
-    _, ext = os.path.splitext(file_storage.filename.lower())
-    safe_name = f"{uuid.uuid4().hex}{ext}"
-    path = os.path.join(UPLOAD_DIR, safe_name)
+    base = os.path.basename(file_storage.filename)
+    stem, ext = os.path.splitext(base)
+    ext = ext.lower()
+
+    # Sanitize the stem: keep alnum, dash, underscore; convert whitespace and others to '_'
+    sanitized_chars = []
+    for ch in stem:
+        if ch.isalnum() or ch in {"-", "_"}:
+            sanitized_chars.append(ch)
+        elif ch.isspace():
+            sanitized_chars.append("_")
+        else:
+            sanitized_chars.append("_")
+    cleaned_stem = "".join(sanitized_chars).strip()
+    if not cleaned_stem:
+        cleaned_stem = "upload"
+
+    candidate = f"{cleaned_stem}{ext}"
+    counter = 1
+    while os.path.exists(os.path.join(UPLOAD_DIR, candidate)):
+        candidate = f"{cleaned_stem}({counter}){ext}"
+        counter += 1
+
+    path = os.path.join(UPLOAD_DIR, candidate)
     file_storage.save(path)
-    return safe_name
+    return candidate
 
 
 def pixel_distance(a: Tuple[int, int], b: Tuple[int, int]) -> float:
@@ -195,11 +257,27 @@ def host():
                         rd.guesses.pop(name, None)
 
             elif action == "add_round":
-                map_file = request.files.get("map_image")
-                filename = save_upload(map_file)
-                path = os.path.join(UPLOAD_DIR, filename)
-                with Image.open(path) as im:
-                    w, h = im.size
+                existing_map = (request.form.get("existing_map") or "").strip()
+
+                if existing_map:
+                    candidate = os.path.basename(existing_map)
+                    path = os.path.join(UPLOAD_DIR, candidate)
+                    if not ext_ok(candidate) or not os.path.isfile(path):
+                        raise ValueError("Selected map is not available anymore.")
+                    filename = candidate
+                    try:
+                        w, h = get_image_size(path)
+                    except Exception:
+                        raise ValueError("The selected image file appears to be corrupted or invalid.")
+                else:
+                    map_file = request.files.get("map_image")
+                    filename = save_upload(map_file)
+                    path = os.path.join(UPLOAD_DIR, filename)
+                    try:
+                        w, h = get_image_size(path)
+                    except Exception:
+                        raise ValueError("The selected image file appears to be corrupted or invalid.")
+
                 rd = Round(id=uuid.uuid4().hex, map_filename=filename, map_size=(w, h))
                 STATE.rounds.append(rd)
                 STATE.current_round_index = len(STATE.rounds) - 1
@@ -225,6 +303,8 @@ def host():
             msg = str(e)
 
     current = current_round()
+    map_library = list_map_library()
+
     return render_template(
         "host.html",
         msg=msg,
@@ -232,6 +312,7 @@ def host():
         rounds=STATE.rounds,
         current=current,
         round_index=STATE.current_round_index,
+        map_library=map_library,
     )
 
 
