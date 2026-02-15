@@ -220,20 +220,25 @@
     if (!img.naturalWidth) return;
     const delta = e.deltaY;
     const factor = Math.exp(-delta * 0.0012);
-    const prevZoom = zoom;
-    zoom = clamp(zoom * factor, 0.5, 6);
-    const { x, y } = screenToImageCoords(e.clientX, e.clientY);
-    const { left, top } = imageTopLeft();
-    const { w, h, s } = currentRenderSize();
-    const preSx = left + x * s;
-    const preSy = top + y * s;
-    const ns = baseScale * zoom;
-    const vw = stage.clientWidth;
-    const vh = stage.clientHeight;
-    const newLeft = (vw - w * ns) / 2;
-    const newTop = (vh - h * ns) / 2;
-    panX += preSx - (newLeft + x * ns);
-    panY += preSy - (newTop + y * ns);
+
+    // Anchor under cursor using pre-zoom state only (no baseScale recompute).
+    const { left: preLeft, top: preTop } = imageTopLeft();
+    const { s: preScale } = currentRenderSize();
+    const anchorX = (e.clientX - preLeft) / preScale;
+    const anchorY = (e.clientY - preTop) / preScale;
+
+    zoom = clamp(zoom * factor, 0.4, 6);
+
+    const { left: postLeft, top: postTop } = imageTopLeft();
+    const { s: postScale } = currentRenderSize();
+
+    const preScreenX = preLeft + anchorX * preScale;
+    const preScreenY = preTop + anchorY * preScale;
+    const postScreenX = postLeft + anchorX * postScale;
+    const postScreenY = postTop + anchorY * postScale;
+
+    panX += preScreenX - postScreenX;
+    panY += preScreenY - postScreenY;
     layoutImage();
   }
 
