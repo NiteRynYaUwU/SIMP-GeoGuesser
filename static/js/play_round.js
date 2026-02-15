@@ -230,8 +230,8 @@
     // Anchor under cursor using pre-zoom state only (no baseScale recompute).
     const { left: preLeft, top: preTop } = imageTopLeft();
     const { s: preScale } = currentRenderSize();
-    const xInStage = e.clientX - rect.left;
-    const yInStage = e.clientY - rect.top;
+    const xInStage = e.clientX - rect.left - stage.clientLeft;
+    const yInStage = e.clientY - rect.top - stage.clientTop;
     const anchorX = (xInStage - preLeft) / preScale;
     const anchorY = (yInStage - preTop) / preScale;
 
