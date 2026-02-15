@@ -111,8 +111,16 @@ def save_upload(file_storage) -> str:
     stem, ext = os.path.splitext(base)
     ext = ext.lower()
 
-    # Sanitize the stem: keep alnum, space, dash, underscore; replace others with '_'
-    cleaned_stem = "".join(ch if ch.isalnum() or ch in {" ", "-", "_"} else "_" for ch in stem).strip()
+    # Sanitize the stem: keep alnum, dash, underscore; convert whitespace and others to '_'
+    sanitized_chars = []
+    for ch in stem:
+        if ch.isalnum() or ch in {"-", "_"}:
+            sanitized_chars.append(ch)
+        elif ch.isspace():
+            sanitized_chars.append("_")
+        else:
+            sanitized_chars.append("_")
+    cleaned_stem = "".join(sanitized_chars).strip()
     if not cleaned_stem:
         cleaned_stem = "upload"
 
