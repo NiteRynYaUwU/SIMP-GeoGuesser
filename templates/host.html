@@ -175,15 +175,26 @@
               </td>
 
               <td>
-                <form method="post" style="margin: 0">
-                  <input type="hidden" name="action" value="goto_round" />
-                  <input
-                    type="hidden"
-                    name="round_index"
-                    value="{{loop.index0}}"
-                  />
-                  <button class="btn-ghost" type="submit">Open</button>
-                </form>
+                  <div class="row" style="gap:8px; flex-wrap:nowrap;">
+
+                      <form method="post" style="margin:0;">
+                          <input type="hidden" name="action" value="goto_round" />
+                          <input type="hidden" name="round_index" value="{{loop.index0}}" />
+                          <button class="btn-ghost" type="submit">Open</button>
+                      </form>
+
+                      <form method="post" style="margin:0;">
+                          <input type="hidden" name="action" value="delete_round" />
+                          <input type="hidden" name="round_id" value="{{ rd.id }}" />
+                          <button class="btn-ghost"
+                                  type="submit"
+                                  style="color: var(--bad);"
+                                  onclick="return confirm('Delete this round? This cannot be undone.');">
+                              Delete
+                          </button>
+                      </form>
+
+                  </div>
               </td>
             </tr>
             {% endfor %}

@@ -137,6 +137,24 @@ def register_routes(app):
                         raise ValueError("Invalid round index.")
                     STATE.current_round_index = idx
 
+                elif action == "delete_round":
+                    round_id = (request.form.get("round_id") or "").strip()
+                    if not round_id:
+                        raise ValueError("Missing round id.")
+
+                    idx = next((i for i, r in enumerate(STATE.rounds) if r.id == round_id), None)
+                    if idx is None:
+                        raise ValueError("Round not found.")
+
+                    STATE.rounds.pop(idx)
+
+                    if not STATE.rounds:
+                        STATE.current_round_index = 0
+                    else:
+                        STATE.current_round_index = min(
+                            STATE.current_round_index,
+                            len(STATE.rounds) - 1
+                        )
                 else:
                     raise ValueError("Unknown action.")
 
