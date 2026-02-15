@@ -172,9 +172,12 @@ def home():
 
 @app.route("/host", methods=["GET", "POST"])
 def host():
-    msg = ""
+    # Allow showing a one-off message after redirects
+    msg = request.args.get("msg", "")
+
     if request.method == "POST":
         action = request.form.get("action")
+
         try:
             if action == "add_player":
                 name = (request.form.get("player_name") or "").strip()
@@ -186,20 +189,17 @@ def host():
 
             elif action == "remove_player":
                 name = request.form.get("player_name")
-                if name:
-                    if name in STATE.players:
-                        STATE.players.remove(name)
+                if name and name in STATE.players:
+                    STATE.players.remove(name)
                     for rd in STATE.rounds:
                         rd.guesses.pop(name, None)
 
             elif action == "add_round":
                 map_file = request.files.get("map_image")
                 filename = save_upload(map_file)
-
                 path = os.path.join(UPLOAD_DIR, filename)
                 with Image.open(path) as im:
                     w, h = im.size
-
                 rd = Round(id=uuid.uuid4().hex, map_filename=filename, map_size=(w, h))
                 STATE.rounds.append(rd)
                 STATE.current_round_index = len(STATE.rounds) - 1
@@ -217,11 +217,14 @@ def host():
 
             else:
                 raise ValueError("Unknown action.")
+
+            #PRG: redirect after ANY successful POST to prevent duplicate submission on refresh
+            return redirect(url_for("host"))
+
         except Exception as e:
             msg = str(e)
 
     current = current_round()
-
     return render_template(
         "host.html",
         msg=msg,
@@ -230,6 +233,7 @@ def host():
         current=current,
         round_index=STATE.current_round_index,
     )
+
 
 
 @app.route("/set_answer/<round_id>", methods=["GET", "POST"])
