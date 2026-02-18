@@ -1,7 +1,19 @@
 (() => {
   const utils = window.GeoUtils;
   if (!utils) return;
-  const { clamp, makePin } = utils;
+  const { clamp, makePin, createPanZoom, applyConstantPinSize, playerColor } = utils;
+
+  const previewWrap = document.getElementById("hostPreviewWrap");
+  const previewViewport = document.getElementById("hostPreviewViewport");
+  const previewReset = document.getElementById("hostPreviewReset");
+  const pz =
+    createPanZoom && previewWrap && previewViewport
+      ? createPanZoom(previewWrap, previewViewport)
+      : null;
+
+  previewReset?.addEventListener("click", () => pz?.reset());
+  previewReset?.addEventListener("pointerdown", (e) => e.stopPropagation());
+  previewReset?.addEventListener("wheel", (e) => e.stopPropagation());
 
   function getGuesses() {
     const el = document.getElementById("hostGuessesJson");
@@ -20,9 +32,11 @@
     if (!img || !svg) return;
     if (!img.naturalWidth || !img.naturalHeight) return;
 
-    const rect = img.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height;
+    img.draggable = false;
+
+    const w = img.offsetWidth;
+    const h = img.offsetHeight;
+    if (!w || !h) return;
 
     svg.setAttribute("width", w);
     svg.setAttribute("height", h);
@@ -35,8 +49,7 @@
     const sy = h / img.naturalHeight;
 
     for (const [name, pt] of Object.entries(guesses)) {
-      let x;
-      let y;
+      let x, y;
       if (Array.isArray(pt)) {
         x = pt[0];
         y = pt[1];
@@ -44,26 +57,32 @@
         x = pt?.x;
         y = pt?.y;
       }
-
       if (x == null || y == null) continue;
+
       const cx = clamp(Math.round(x * sx), 0, w);
       const cy = clamp(Math.round(y * sy), 0, h);
-      makePin(svg, cx, cy, name);
+
+      // ✅ per-player deterministic random color
+      makePin(svg, cx, cy, playerColor(name), name);
     }
+
+    const t = pz?.getTransform?.() || { scale: 1, tx: 0, ty: 0 };
+    applyConstantPinSize(svg, t.scale);
 
     if (tooltip) {
       const show = (e, label) => {
         tooltip.textContent = label;
         tooltip.style.display = "block";
         const pad = 10;
-        const x = clamp(e.offsetX + 12, pad, w - tooltip.offsetWidth - pad);
-        const y = clamp(e.offsetY + 12, pad, h - tooltip.offsetHeight - pad);
+        const hostRect = (previewWrap || img).getBoundingClientRect();
+        const lx = e.clientX - hostRect.left;
+        const ly = e.clientY - hostRect.top;
+        const x = clamp(lx + 12, pad, hostRect.width - tooltip.offsetWidth - pad);
+        const y = clamp(ly + 12, pad, hostRect.height - tooltip.offsetHeight - pad);
         tooltip.style.left = `${x}px`;
         tooltip.style.top = `${y}px`;
       };
-      const hide = () => {
-        tooltip.style.display = "none";
-      };
+      const hide = () => (tooltip.style.display = "none");
 
       svg.onmousemove = (e) => {
         const pin = e.target?.closest?.(".pin");
@@ -73,6 +92,11 @@
       svg.onmouseleave = hide;
     }
   }
+
+  pz?.setOnChange?.(({ scale }) => {
+    const svg = document.getElementById("hostPreviewSvg");
+    applyConstantPinSize(svg, scale);
+  });
 
   window.addEventListener("resize", layout);
   document.addEventListener("DOMContentLoaded", () => {
@@ -96,10 +120,7 @@
     });
   });
 
-  closeBtn?.addEventListener("click", () => {
-    popup.style.display = "none";
-  });
-
+  closeBtn?.addEventListener("click", () => (popup.style.display = "none"));
   popup?.addEventListener("click", (e) => {
     if (e.target === popup) popup.style.display = "none";
   });

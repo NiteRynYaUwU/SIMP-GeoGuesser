@@ -1,7 +1,7 @@
 (() => {
   const utils = window.GeoUtils;
   if (!utils) return;
-  const { clamp, makePin } = utils;
+  const { clamp, makePin, makeAnswerPin, createPanZoom, applyConstantPinSize, playerColor } = utils;
 
   function parseRoundGuesses(roundIndex) {
     const script = document.querySelector(`script.pindata[data-round="${roundIndex}"]`);
@@ -20,9 +20,12 @@
     if (!img || !svg) return;
     if (!img.naturalWidth || !img.naturalHeight) return;
 
-    const rect = img.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height;
+    img.draggable = false;
+
+    const w = img.offsetWidth;
+    const h = img.offsetHeight;
+    if (!w || !h) return;
+
     svg.setAttribute("width", w);
     svg.setAttribute("height", h);
     svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
@@ -37,8 +40,7 @@
 
     for (const [name, pt] of Object.entries(guesses)) {
       if (!pt) continue;
-      let x;
-      let y;
+      let x, y;
       if (Array.isArray(pt)) {
         x = pt[0];
         y = pt[1];
@@ -47,9 +49,11 @@
         y = pt.y;
       }
       if (x == null || y == null) continue;
+
       const cx = clamp(Math.round(x * scaleX), 0, w);
       const cy = clamp(Math.round(y * scaleY), 0, h);
-      makePin(svg, cx, cy, "rgba(37,99,235,0.98)", name);
+
+      makePin(svg, cx, cy, playerColor(name), name);
     }
 
     const ax = Number(wrap.dataset.answerX);
@@ -57,30 +61,33 @@
     if (Number.isFinite(ax) && Number.isFinite(ay)) {
       const cx = clamp(Math.round(ax * scaleX), 0, w);
       const cy = clamp(Math.round(ay * scaleY), 0, h);
-      makePin(svg, cx, cy, "rgba(220,38,38,0.98)", "Answer");
+
+      // Answer pin uses STAR shape now
+      makeAnswerPin(svg, cx, cy, "rgba(220,38,38,0.98)", "Answer");
     }
+
+    const t = wrap._pz?.getTransform?.() || { scale: 1, tx: 0, ty: 0 };
+    applyConstantPinSize(svg, t.scale);
 
     if (tooltip) {
       const show = (e, label) => {
         tooltip.textContent = label;
         tooltip.style.display = "block";
         const pad = 10;
-        const x = clamp(e.offsetX + 12, pad, w - tooltip.offsetWidth - pad);
-        const y = clamp(e.offsetY + 12, pad, h - tooltip.offsetHeight - pad);
+        const wrapRect = wrap.getBoundingClientRect();
+        const lx = e.clientX - wrapRect.left;
+        const ly = e.clientY - wrapRect.top;
+        const x = clamp(lx + 12, pad, wrapRect.width - tooltip.offsetWidth - pad);
+        const y = clamp(ly + 12, pad, wrapRect.height - tooltip.offsetHeight - pad);
         tooltip.style.left = `${x}px`;
         tooltip.style.top = `${y}px`;
       };
-      const hide = () => {
-        tooltip.style.display = "none";
-      };
+      const hide = () => (tooltip.style.display = "none");
 
       svg.onmousemove = (e) => {
-        const pin = e.target && e.target.closest ? e.target.closest(".pin") : null;
-        if (pin && pin.dataset && pin.dataset.label) {
-          show(e, pin.dataset.label);
-        } else {
-          hide();
-        }
+        const pin = e.target?.closest?.(".pin");
+        if (pin?.dataset?.label) show(e, pin.dataset.label);
+        else hide();
       };
       svg.onmouseleave = hide;
     }
@@ -91,7 +98,25 @@
   }
 
   window.addEventListener("resize", layoutAll);
+
   document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".pinwrap").forEach((wrap) => {
+      const viewport = wrap.querySelector(".pzViewport");
+      const btn = wrap.querySelector("button.resetView");
+
+      const pz = createPanZoom && viewport ? createPanZoom(wrap, viewport) : null;
+      wrap._pz = pz;
+
+      btn?.addEventListener("click", () => pz?.reset());
+      btn?.addEventListener("pointerdown", (e) => e.stopPropagation());
+      btn?.addEventListener("wheel", (e) => e.stopPropagation());
+
+      pz?.setOnChange?.(({ scale }) => {
+        const svg = wrap.querySelector("svg.pinsvg");
+        applyConstantPinSize(svg, scale);
+      });
+    });
+
     setTimeout(() => layoutAll(), 0);
     document.querySelectorAll(".pinwrap img.pinmap").forEach((img) => {
       img.addEventListener("load", () => layoutAll());

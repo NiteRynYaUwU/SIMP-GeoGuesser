@@ -55,17 +55,37 @@
             max-width: 1200px;
           "
         >
-          <img id="map" src="{{url_for('uploads', filename=map_fn)}}" />
-          <svg
-            id="pinSvg"
+          <button
+            id="resetView"
+            class="btn-ghost"
+            type="button"
             style="
               position: absolute;
-              inset: 0;
-              width: 100%;
-              height: 100%;
-              pointer-events: none;
+              top: 10px;
+              right: 10px;
+              z-index: 6;
+              padding: 8px 10px;
+              border-radius: 12px;
+              background: rgba(255, 255, 255, 0.9);
+              backdrop-filter: blur(6px);
             "
-          ></svg>
+          >
+            Reset
+          </button>
+
+          <div id="mapViewport" style="position: relative; width: 100%">
+            <img id="map" src="{{url_for('uploads', filename=map_fn)}}" />
+            <svg
+              id="pinSvg"
+              style="
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
+              "
+            ></svg>
+          </div>
         </div>
 
         <form

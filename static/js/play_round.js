@@ -22,7 +22,9 @@
 
   const toast = document.getElementById("toast");
 
-  document.querySelector(".hud")?.addEventListener("pointerdown", (e) => e.stopPropagation());
+  document
+    .querySelector(".hud")
+    ?.addEventListener("pointerdown", (e) => e.stopPropagation());
   document.querySelector(".hud")?.addEventListener("click", (e) => e.stopPropagation());
 
   let players = [];
@@ -35,6 +37,46 @@
 
   const clamp = window.GeoUtils?.clamp;
   if (!clamp) return;
+
+  function getPlayerColor(name) {
+    return window.GeoUtils?.playerColor
+      ? window.GeoUtils.playerColor(name)
+      : "rgba(37,99,235,0.98)";
+  }
+
+  // NEW: show a color dot next to the dropdown (works across browsers)
+  function ensureSelectedDot() {
+    if (!playerSel) return null;
+    const hud = document.querySelector(".hud") || playerSel.parentElement;
+    if (!hud) return null;
+
+    let dot = document.getElementById("playerColorDot");
+    if (dot) return dot;
+
+    dot = document.createElement("span");
+    dot.id = "playerColorDot";
+    dot.setAttribute("aria-hidden", "true");
+    dot.style.display = "inline-block";
+    dot.style.width = "10px";
+    dot.style.height = "10px";
+    dot.style.borderRadius = "999px";
+    dot.style.marginRight = "8px";
+    dot.style.verticalAlign = "middle";
+    dot.style.border = "1px solid rgba(16,24,40,0.25)";
+    dot.style.boxShadow = "0 1px 2px rgba(16,24,40,0.15)";
+
+    // Place it just before the select so it looks like part of the same control.
+    playerSel.insertAdjacentElement("beforebegin", dot);
+    return dot;
+  }
+
+  function updateSelectedDot() {
+    const dot = ensureSelectedDot();
+    if (!dot) return;
+    const p = playerSel?.value || "";
+    dot.style.background = getPlayerColor(p);
+    dot.title = p ? `Color: ${p}` : "Color";
+  }
 
   function showToast(text, isError = false) {
     toast.textContent = text;
@@ -120,6 +162,8 @@
     pinStatus.textContent = "Pin: shown";
     const p = imageToScreenCoords(g.x, g.y);
 
+    const col = getPlayerColor(player);
+
     const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
     const outer = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -134,14 +178,14 @@
     inner.setAttribute("cx", p.sx);
     inner.setAttribute("cy", p.sy);
     inner.setAttribute("r", 4);
-    inner.setAttribute("fill", "rgba(37,99,235,0.98)");
+    inner.setAttribute("fill", col);
     inner.setAttribute("stroke", "rgba(16,24,40,0.18)");
     inner.setAttribute("stroke-width", 1);
 
     const tail = document.createElementNS("http://www.w3.org/2000/svg", "path");
     const d = `M ${p.sx} ${p.sy + 11} L ${p.sx - 6} ${p.sy + 25} L ${p.sx + 6} ${p.sy + 25} Z`;
     tail.setAttribute("d", d);
-    tail.setAttribute("fill", "rgba(255,255,255,0.95)");
+    tail.setAttribute("fill", col);
     tail.setAttribute("stroke", "rgba(16,24,40,0.25)");
     tail.setAttribute("stroke-width", 2);
 
@@ -153,6 +197,7 @@
 
   function refreshPin() {
     drawPinForPlayer(playerSel.value);
+    updateSelectedDot();
   }
 
   function computeGuessStats() {
@@ -344,9 +389,7 @@
       if (typeof stage.setPointerCapture === "function") {
         stage.setPointerCapture(e.pointerId);
       }
-    } catch (err) {
-      // Ignore capture errors; dragging will still work in most cases.
-    }
+    } catch (err) {}
     onDragStart(e);
   }
 

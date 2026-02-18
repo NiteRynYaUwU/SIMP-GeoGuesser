@@ -6,16 +6,31 @@
   const form = document.getElementById("answerForm");
   const toast = document.getElementById("toast");
   const svg = document.getElementById("pinSvg");
+  const wrap = document.getElementById("mapWrap");
+  const viewport = document.getElementById("mapViewport");
+  const resetBtn = document.getElementById("resetView");
 
-  const clamp = window.GeoUtils?.clamp;
-  if (!clamp) return;
+  const utils = window.GeoUtils;
+  if (!utils) return;
+  const { clamp, createPanZoom, makeAnswerPin, applyConstantPinSize } = utils;
+
+  if (img) img.draggable = false;
+
+  const pz = createPanZoom && wrap && viewport ? createPanZoom(wrap, viewport) : null;
+  resetBtn?.addEventListener("click", () => pz?.reset());
+  resetBtn?.addEventListener("pointerdown", (e) => e.stopPropagation());
+  resetBtn?.addEventListener("wheel", (e) => e.stopPropagation());
+
+  pz?.setOnChange?.(({ scale }) => {
+    applyConstantPinSize(svg, scale);
+  });
 
   function drawAnswerPin(x, y) {
     if (!svg || !img.naturalWidth || !img.naturalHeight) return;
 
-    const rect = img.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height;
+    const w = img.offsetWidth;
+    const h = img.offsetHeight;
+    if (!w || !h) return;
 
     svg.setAttribute("width", w);
     svg.setAttribute("height", h);
@@ -27,23 +42,20 @@
     const cx = clamp(Math.round(x * scaleX), 0, w);
     const cy = clamp(Math.round(y * scaleY), 0, h);
 
-    svg.innerHTML = `
-      <g>
-        <path d="M ${cx} ${cy + 11} L ${cx - 6} ${cy + 25} L ${cx + 6} ${cy + 25} Z"
-          fill="rgba(220,38,38,0.98)" stroke="rgba(16,24,40,0.18)" stroke-width="2"></path>
-        <circle cx="${cx}" cy="${cy}" r="11" fill="rgba(255,255,255,0.98)"
-          stroke="rgba(16,24,40,0.18)" stroke-width="2"></circle>
-        <circle cx="${cx}" cy="${cy}" r="4" fill="rgba(220,38,38,0.98)"
-          stroke="rgba(16,24,40,0.18)" stroke-width="1"></circle>
-      </g>
-    `;
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+    // Answer pin uses STAR shape now
+    makeAnswerPin(svg, cx, cy, "rgba(220,38,38,0.98)", "Answer");
+
+    const t = pz?.getTransform?.() || { scale: 1, tx: 0, ty: 0 };
+    applyConstantPinSize(svg, t.scale);
   }
 
   function redrawIfSelected() {
     if (xInput.value && yInput.value) {
       drawAnswerPin(Number(xInput.value), Number(yInput.value));
     } else if (svg) {
-      svg.innerHTML = "";
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
     }
   }
 
@@ -71,10 +83,26 @@
   img.addEventListener("load", redrawIfSelected);
   setTimeout(redrawIfSelected, 0);
 
-  img.addEventListener("click", (e) => {
-    const rect = img.getBoundingClientRect();
-    const x = Math.round((e.clientX - rect.left) * (img.naturalWidth / rect.width));
-    const y = Math.round((e.clientY - rect.top) * (img.naturalHeight / rect.height));
+  wrap.addEventListener("click", (e) => {
+    if (e.target && e.target.closest && e.target.closest("#resetView")) return;
+    if (pz?.consumeMoved?.()) return;
+
+    const wrapRect = wrap.getBoundingClientRect();
+    const localX = e.clientX - wrapRect.left;
+    const localY = e.clientY - wrapRect.top;
+
+    const t = pz?.getTransform?.() || { scale: 1, tx: 0, ty: 0 };
+
+    const baseX = (localX - t.tx) / t.scale;
+    const baseY = (localY - t.ty) / t.scale;
+
+    const w = img.offsetWidth;
+    const h = img.offsetHeight;
+    if (!w || !h) return;
+
+    const x = Math.round(baseX * (img.naturalWidth / w));
+    const y = Math.round(baseY * (img.naturalHeight / h));
+
     xInput.value = x;
     yInput.value = y;
     xy.textContent = `(${x}, ${y})`;
