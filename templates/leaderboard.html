@@ -91,7 +91,10 @@
           </button>
 
           <div class="pzViewport" style="position: relative; width: 100%">
-            <img class="pinmap" src="{{ url_for('uploads', filename='maps/' ~ rd.map) }}" />
+            <img
+              class="pinmap"
+              src="{{ url_for('uploads', filename='maps/' ~ rd.map) }}"
+            />
             <svg
               class="pinsvg"
               style="position: absolute; inset: 0; width: 100%; height: 100%"

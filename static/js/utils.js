@@ -60,7 +60,8 @@
 
     const setTransform = (next) => {
       if (!next) return;
-      if (typeof next.scale === "number") scale = clamp(next.scale, minScale, maxScale);
+      if (typeof next.scale === "number")
+        scale = clamp(next.scale, minScale, maxScale);
       if (typeof next.tx === "number") tx = next.tx;
       if (typeof next.ty === "number") ty = next.ty;
       apply();
@@ -95,7 +96,9 @@
       startTx = tx;
       startTy = ty;
       wrapEl.style.cursor = "grabbing";
-      try { wrapEl.setPointerCapture(e.pointerId); } catch {}
+      try {
+        wrapEl.setPointerCapture(e.pointerId);
+      } catch {}
     };
 
     const onPointerMove = (e) => {
@@ -112,7 +115,9 @@
       if (!dragging) return;
       dragging = false;
       wrapEl.style.cursor = "grab";
-      try { wrapEl.releasePointerCapture(e.pointerId); } catch {}
+      try {
+        wrapEl.releasePointerCapture(e.pointerId);
+      } catch {}
     };
 
     const consumeMoved = () => {
@@ -134,14 +139,17 @@
       reset,
       getTransform,
       setTransform,
-      setOnChange(fn) { onChange = fn; },
+      setOnChange(fn) {
+        onChange = fn;
+      },
       consumeMoved,
     };
   }
 
   // Standard player pin (dot in circle + tail)
   function makePin(svg, cx, cy, colorOrLabel, maybeLabel) {
-    const color = maybeLabel === undefined ? "rgba(37,99,235,0.98)" : colorOrLabel;
+    const color =
+      maybeLabel === undefined ? "rgba(37,99,235,0.98)" : colorOrLabel;
     const label = maybeLabel === undefined ? colorOrLabel : maybeLabel;
 
     const ns = "http://www.w3.org/2000/svg";
@@ -152,7 +160,10 @@
     if (label != null) g.dataset.label = label;
 
     const tail = document.createElementNS(ns, "path");
-    tail.setAttribute("d", `M ${cx} ${cy + 11} L ${cx - 6} ${cy + 25} L ${cx + 6} ${cy + 25} Z`);
+    tail.setAttribute(
+      "d",
+      `M ${cx} ${cy + 11} L ${cx - 6} ${cy + 25} L ${cx + 6} ${cy + 25} Z`,
+    );
     tail.setAttribute("fill", color);
     tail.setAttribute("stroke", "rgba(16,24,40,0.18)");
     tail.setAttribute("stroke-width", "2");
@@ -187,7 +198,13 @@
   }
 
   // NEW: Answer pin (same tail + white circle, but STAR instead of dot)
-  function makeAnswerPin(svg, cx, cy, color = "rgba(220,38,38,0.98)", label = "Answer") {
+  function makeAnswerPin(
+    svg,
+    cx,
+    cy,
+    color = "rgba(220,38,38,0.98)",
+    label = "Answer",
+  ) {
     const ns = "http://www.w3.org/2000/svg";
     const g = document.createElementNS(ns, "g");
     g.classList.add("pin", "answer-pin");
@@ -196,7 +213,10 @@
     if (label != null) g.dataset.label = label;
 
     const tail = document.createElementNS(ns, "path");
-    tail.setAttribute("d", `M ${cx} ${cy + 11} L ${cx - 6} ${cy + 25} L ${cx + 6} ${cy + 25} Z`);
+    tail.setAttribute(
+      "d",
+      `M ${cx} ${cy + 11} L ${cx - 6} ${cy + 25} L ${cx + 6} ${cy + 25} Z`,
+    );
     tail.setAttribute("fill", color);
     tail.setAttribute("stroke", "rgba(16,24,40,0.18)");
     tail.setAttribute("stroke-width", "2");
@@ -211,11 +231,11 @@
 
     // 5-point star centered at (cx,cy)
     const star = document.createElementNS(ns, "path");
-    const R = 7.2;      // outer radius
-    const r = 3.2;      // inner radius
+    const R = 7.2; // outer radius
+    const r = 3.2; // inner radius
     let d = "";
     for (let i = 0; i < 10; i++) {
-      const ang = (-Math.PI / 2) + (i * Math.PI / 5);
+      const ang = -Math.PI / 2 + (i * Math.PI) / 5;
       const rad = i % 2 === 0 ? R : r;
       const x = cx + Math.cos(ang) * rad;
       const y = cy + Math.sin(ang) * rad;
@@ -242,7 +262,9 @@
 
   function applyConstantPinSize(svg, currentScale) {
     if (!svg || !currentScale || currentScale === 1) {
-      svg?.querySelectorAll?.("g.pin").forEach((g) => g.removeAttribute("transform"));
+      svg
+        ?.querySelectorAll?.("g.pin")
+        .forEach((g) => g.removeAttribute("transform"));
       return;
     }
 
@@ -251,7 +273,10 @@
       const cx = Number(g.dataset.cx);
       const cy = Number(g.dataset.cy);
       if (!Number.isFinite(cx) || !Number.isFinite(cy)) return;
-      g.setAttribute("transform", `translate(${cx} ${cy}) scale(${inv}) translate(${-cx} ${-cy})`);
+      g.setAttribute(
+        "transform",
+        `translate(${cx} ${cy}) scale(${inv}) translate(${-cx} ${-cy})`,
+      );
     });
   }
 

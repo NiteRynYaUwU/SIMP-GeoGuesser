@@ -1,10 +1,19 @@
 (() => {
   const utils = window.GeoUtils;
   if (!utils) return;
-  const { clamp, makePin, makeAnswerPin, createPanZoom, applyConstantPinSize, playerColor } = utils;
+  const {
+    clamp,
+    makePin,
+    makeAnswerPin,
+    createPanZoom,
+    applyConstantPinSize,
+    playerColor,
+  } = utils;
 
   function parseRoundGuesses(roundIndex) {
-    const script = document.querySelector(`script.pindata[data-round="${roundIndex}"]`);
+    const script = document.querySelector(
+      `script.pindata[data-round="${roundIndex}"]`,
+    );
     if (!script) return {};
     try {
       return JSON.parse(script.textContent || "{}");
@@ -77,8 +86,16 @@
         const wrapRect = wrap.getBoundingClientRect();
         const lx = e.clientX - wrapRect.left;
         const ly = e.clientY - wrapRect.top;
-        const x = clamp(lx + 12, pad, wrapRect.width - tooltip.offsetWidth - pad);
-        const y = clamp(ly + 12, pad, wrapRect.height - tooltip.offsetHeight - pad);
+        const x = clamp(
+          lx + 12,
+          pad,
+          wrapRect.width - tooltip.offsetWidth - pad,
+        );
+        const y = clamp(
+          ly + 12,
+          pad,
+          wrapRect.height - tooltip.offsetHeight - pad,
+        );
         tooltip.style.left = `${x}px`;
         tooltip.style.top = `${y}px`;
       };
@@ -104,7 +121,8 @@
       const viewport = wrap.querySelector(".pzViewport");
       const btn = wrap.querySelector("button.resetView");
 
-      const pz = createPanZoom && viewport ? createPanZoom(wrap, viewport) : null;
+      const pz =
+        createPanZoom && viewport ? createPanZoom(wrap, viewport) : null;
       wrap._pz = pz;
 
       btn?.addEventListener("click", () => pz?.reset());

@@ -74,7 +74,10 @@
           </button>
 
           <div id="mapViewport" style="position: relative; width: 100%">
-            <img id="map" src="{{url_for('uploads', filename='maps/' ~ map_fn)}}" />
+            <img
+              id="map"
+              src="{{url_for('uploads', filename='maps/' ~ map_fn)}}"
+            />
             <svg
               id="pinSvg"
               style="

@@ -24,7 +24,9 @@
   document
     .querySelector(".hud")
     ?.addEventListener("pointerdown", (e) => e.stopPropagation());
-  document.querySelector(".hud")?.addEventListener("click", (e) => e.stopPropagation());
+  document
+    .querySelector(".hud")
+    ?.addEventListener("click", (e) => e.stopPropagation());
 
   let players = [];
   let guesses = {};
@@ -160,7 +162,10 @@
 
     const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
-    const outer = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const outer = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle",
+    );
     outer.setAttribute("cx", p.sx);
     outer.setAttribute("cy", p.sy);
     outer.setAttribute("r", 11);
@@ -168,7 +173,10 @@
     outer.setAttribute("stroke", "rgba(16,24,40,0.25)");
     outer.setAttribute("stroke-width", 2);
 
-    const inner = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    const inner = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "circle",
+    );
     inner.setAttribute("cx", p.sx);
     inner.setAttribute("cy", p.sy);
     inner.setAttribute("r", 4);
@@ -364,10 +372,14 @@
     layoutImage();
   });
 
-  stage.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    onWheel(e);
-  }, { passive: false });
+  stage.addEventListener(
+    "wheel",
+    (e) => {
+      e.preventDefault();
+      onWheel(e);
+    },
+    { passive: false },
+  );
 
   function handlePointerDown(e) {
     // Use pointer events for touch/stylus while keeping existing mouse behavior.
