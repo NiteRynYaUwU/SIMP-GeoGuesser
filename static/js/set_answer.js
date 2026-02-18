@@ -16,7 +16,8 @@
 
   if (img) img.draggable = false;
 
-  const pz = createPanZoom && wrap && viewport ? createPanZoom(wrap, viewport) : null;
+  const pz =
+    createPanZoom && wrap && viewport ? createPanZoom(wrap, viewport) : null;
   resetBtn?.addEventListener("click", () => pz?.reset());
   resetBtn?.addEventListener("pointerdown", (e) => e.stopPropagation());
   resetBtn?.addEventListener("wheel", (e) => e.stopPropagation());

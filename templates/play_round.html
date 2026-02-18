@@ -19,12 +19,13 @@
       <img
         id="sceneImg"
         src="{{ url_for('uploads', filename='scenes/' ~ scene_fn) }}"
-
         alt="Scene"
       />
       {% else %}
       <div class="scenePlaceholder">
-        <div class="muted" style="font-weight: 950">No scene image uploaded</div>
+        <div class="muted" style="font-weight: 950">
+          No scene image uploaded
+        </div>
         <div class="muted" style="font-size: 12px; margin-top: 6px">
           Host can upload one in the Host panel → Rounds.
         </div>
@@ -34,7 +35,11 @@
       <!-- Minimap (drag/zoom/click to place pins) -->
       <div class="stage minimap" id="stage" aria-label="Minimap">
         <div id="mapLayer">
-          <img id="mapImg" src="{{url_for('uploads', filename='maps/' ~ map_fn)}}" alt="Map" />
+          <img
+            id="mapImg"
+            src="{{url_for('uploads', filename='maps/' ~ map_fn)}}"
+            alt="Map"
+          />
         </div>
         <svg id="overlay" class="overlay"></svg>
       </div>
@@ -69,7 +74,6 @@
         <label for="player">Player</label>
         <select id="player"></select>
         <span class="pill" id="guessedPill">Guessed: 0 / 0</span>
-        
       </div>
 
       <div class="group">

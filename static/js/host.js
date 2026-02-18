@@ -1,7 +1,8 @@
 (() => {
   const utils = window.GeoUtils;
   if (!utils) return;
-  const { clamp, makePin, createPanZoom, applyConstantPinSize, playerColor } = utils;
+  const { clamp, makePin, createPanZoom, applyConstantPinSize, playerColor } =
+    utils;
 
   const previewWrap = document.getElementById("hostPreviewWrap");
   const previewViewport = document.getElementById("hostPreviewViewport");
@@ -77,8 +78,16 @@
         const hostRect = (previewWrap || img).getBoundingClientRect();
         const lx = e.clientX - hostRect.left;
         const ly = e.clientY - hostRect.top;
-        const x = clamp(lx + 12, pad, hostRect.width - tooltip.offsetWidth - pad);
-        const y = clamp(ly + 12, pad, hostRect.height - tooltip.offsetHeight - pad);
+        const x = clamp(
+          lx + 12,
+          pad,
+          hostRect.width - tooltip.offsetWidth - pad,
+        );
+        const y = clamp(
+          ly + 12,
+          pad,
+          hostRect.height - tooltip.offsetHeight - pad,
+        );
         tooltip.style.left = `${x}px`;
         tooltip.style.top = `${y}px`;
       };
