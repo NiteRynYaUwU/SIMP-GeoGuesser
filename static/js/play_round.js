@@ -280,7 +280,7 @@
     const anchorX = (xInStage - preLeft) / preScale;
     const anchorY = (yInStage - preTop) / preScale;
 
-    zoom = clamp(zoom * factor, 0.4, 12);
+    zoom = clamp(zoom * factor, 0.4, 16);
 
     const { left: postLeft, top: postTop } = imageTopLeft();
     const { s: postScale } = currentRenderSize();

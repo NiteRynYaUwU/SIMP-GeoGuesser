@@ -291,7 +291,8 @@
 
                       <div id="hostPreviewViewport" style="position: relative; width: 100%">
                         <img id="hostPreviewImg"
-                             src="{{ url_for('uploads', filename=current.map_filename) }}"
+                             src="{{ url_for('uploads', filename='maps/' ~ current.map_filename) }}"
+
                              style="
                   width: 100%;
                   height: auto;

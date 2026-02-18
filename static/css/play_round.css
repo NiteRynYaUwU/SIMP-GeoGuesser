@@ -46,11 +46,11 @@ body {
   position: fixed;
   right: 14px;
   bottom: 14px;
-  width: min(550px, 44vw);
-  height: min(550px, 46vh);
+  width: min(550px, 35vw);
+  height: min(340px, 40vh);
   border-radius: 14px;
   border: 1px solid rgba(157, 237, 252, 0.95);
-  background: rgba(2, 3, 73, 0.92);
+  background: rgba(0, 0, 24, 0.92);
   box-shadow: 0 12px 40px rgba(16, 24, 40, 0.18);
   overflow: hidden;
 }
