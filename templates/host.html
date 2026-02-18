@@ -34,7 +34,7 @@
               <div class="card">
                   <div class="tag">Players</div>
                   <div class="muted" style="margin-top: 8px">
-                      Add Player names(Can add during round)
+                      Add Player names(Can also add during round)
                   </div>
                   <form method="post" class="row" style="margin-top: 12px">
                       <input type="hidden" name="action" value="add_player" />
@@ -68,7 +68,7 @@
               <div class="card">
                   <div class="tag">Rounds</div>
                   <div class="muted" style="margin-top: 8px">
-                      Each round needs a <b>map</b> (for pin placement/scoring) and a <b>scene image</b> (what players see).
+                      Each round needs a <b>map</b> and a <b>scene image</b> (what players see).
                   </div>
                   <form method="post"
                         enctype="multipart/form-data"
@@ -160,7 +160,7 @@
                           <th>Map</th>
                           <th>Scene</th>
                           <th>Answer</th>
-                          <th>Play link</th>
+                          <th>Play</th>
                           <th></th>
                       </tr>
                       {% for rd in rounds %}
@@ -199,7 +199,7 @@
                                  href="{{ url_for('play_round', round_id=rd.id) }}"
                                  data-answer-set="{{ 1 if rd.answer_xy else 0 }}"
                                  data-set-url="{{ url_for('set_answer', round_id=rd.id) }}">
-                                  Open play
+                                  Play
                               </a>
                           </td>
 
@@ -209,7 +209,7 @@
                                   <form method="post" style="margin:0;">
                                       <input type="hidden" name="action" value="goto_round" />
                                       <input type="hidden" name="round_index" value="{{loop.index0}}" />
-                                      <button class="btn-ghost" type="submit">Open</button>
+                                      <button class="btn-ghost" type="submit">Select</button>
                                   </form>
 
                                   <form method="post" style="margin:0;">
@@ -254,14 +254,14 @@
                          href="{{ url_for('play_round', round_id=current.id) }}"
                          data-answer-set="{{ 1 if current.answer_xy else 0 }}"
                          data-set-url="{{ url_for('set_answer', round_id=current.id) }}">
-                          Open play
+                          Play
                       </a>
                   </div>
               </div>
 
               <div style="margin-top: 12px">
                   <div class="muted" style="margin-bottom: 10px">
-                      Map preview (player guesses)
+                      Map preview
                   </div>
 
                   <div id="hostPreviewWrap"

@@ -9,7 +9,6 @@
   const overlay = document.getElementById("overlay");
 
   const playerSel = document.getElementById("player");
-  const pinStatus = document.getElementById("pinStatus");
   const guessedPill = document.getElementById("guessedPill");
 
   const addPlayerForm = document.getElementById("addPlayerForm");
@@ -155,11 +154,6 @@
   function drawPinForPlayer(player) {
     clearOverlay();
     const g = guesses[player];
-    if (!g) {
-      pinStatus.textContent = "Pin: —";
-      return;
-    }
-    pinStatus.textContent = "Pin: shown";
     const p = imageToScreenCoords(g.x, g.y);
 
     const col = getPlayerColor(player);
