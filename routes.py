@@ -215,7 +215,7 @@ def register_routes(app):
                 elif action == "delete_saved_round":
                     sid = (request.form.get("save_id") or "").strip()
                     if not sid:
-                        raise ValueError("Missing save id.")
+                        raise ValueError("Please select a saved round to delete.")
                     delete_saved_round(sid)
 
                 else:
