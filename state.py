@@ -134,10 +134,10 @@ def save_upload(file_storage, sub_folder) -> str:
 
     cleaned_stem = "".join(sanitized_chars).strip()
 
-        # Windows does not like trailing dots/spaces in filenames
+    # Windows does not like trailing dots/spaces in filenames
     cleaned_stem = cleaned_stem.strip(" .")
 
-        # Avoid empty names
+    # Avoid empty names
     if not cleaned_stem:
         cleaned_stem = "upload"
 
