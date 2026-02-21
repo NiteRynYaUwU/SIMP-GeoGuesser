@@ -313,12 +313,12 @@ def _validate_saved_assets(map_filename: str, scene_filename: Optional[str]):
         raise ValueError("Saved round is missing map filename.")
     map_path = os.path.join(UPLOAD_DIR, "maps", os.path.basename(map_filename))
     if not os.path.isfile(map_path):
-        raise ValueError(f"Saved map not found: {map_filename}")
+        raise ValueError(f"Saved map not found: {os.path.basename(map_filename)}")
 
     if scene_filename:
         scene_path = os.path.join(UPLOAD_DIR, "scenes", os.path.basename(scene_filename))
         if not os.path.isfile(scene_path):
-            raise ValueError(f"Saved scene not found: {scene_filename}")
+            raise ValueError(f"Saved scene not found: {os.path.basename(scene_filename)}")
 
 
 def load_saved_round(save_id: str) -> Tuple[Round, List[str]]:
