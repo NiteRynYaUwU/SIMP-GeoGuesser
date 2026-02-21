@@ -290,7 +290,7 @@ def save_round_snapshot(round_id: str) -> str:
         "display_name": display_name,
         "round_num": round_num,
         "round_ver": ver,
-        "saved_at": datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
+        "saved_at": datetime.datetime.now(datetime.UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "players": list(STATE.players),
         "round": {
             "id": rd.id,
