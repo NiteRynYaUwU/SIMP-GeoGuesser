@@ -339,7 +339,9 @@ def load_saved_round(save_id: str) -> Round:
         obj = json.load(f)
 
     if obj.get("type") != "round":
-        raise ValueError("Invalid save file.")
+        raise ValueError(
+            'The selected save file is corrupted or has an invalid format (missing or incorrect "type": "round" metadata).'
+        )
 
     saved_players = obj.get("players") or []
     for p in saved_players:
