@@ -312,9 +312,7 @@ def list_saved_rounds() -> List[Dict[str, object]]:
         )
 
     # newest first where possible
-    def key(i):
-        return i.get("saved_at") or ""
-    items.sort(key=key, reverse=True)
+    items.sort(key=lambda i: i.get("saved_at") or "", reverse=True)
     return items
 
 
