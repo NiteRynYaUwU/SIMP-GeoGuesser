@@ -241,51 +241,51 @@
   });
 
   addPlayerForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = (newPlayerInput.value || "").trim();
-  if (!name) {
-    showToast("Name cannot be empty.", true);
-    return;
-  }
+    e.preventDefault();
+    const name = (newPlayerInput.value || "").trim();
+    if (!name) {
+      showToast("Name cannot be empty.", true);
+      return;
+    }
 
-  // 1) Only real fetch failures should be called "Network error"
-  let res;
-  try {
-    res = await fetch("/api/add_player", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
-    });
-  } catch (err) {
-    console.error("Fetch failed:", err);
-    showToast("Network error", true);
-    return;
-  }
+    // 1) Only real fetch failures should be called "Network error"
+    let res;
+    try {
+      res = await fetch("/api/add_player", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+    } catch (err) {
+      console.error("Fetch failed:", err);
+      showToast("Network error", true);
+      return;
+    }
 
-  // 2) Parse JSON safely
-  let js = null;
-  try {
-    js = await res.json();
-  } catch (err) {
-    console.error("JSON parse failed:", err);
-  }
+    // 2) Parse JSON safely
+    let js = null;
+    try {
+      js = await res.json();
+    } catch (err) {
+      console.error("JSON parse failed:", err);
+    }
 
-  if (!res.ok || !js || !js.ok) {
-    const msg = (js && js.error) || `Failed to add (HTTP ${res.status})`;
-    showToast(msg, true);
-    return;
-  }
+    if (!res.ok || !js || !js.ok) {
+      const msg = (js && js.error) || `Failed to add (HTTP ${res.status})`;
+      showToast(msg, true);
+      return;
+    }
 
-  // 3) UI update errors shouldn't be misreported as network errors
-  try {
-    players = js.players;
-    newPlayerInput.value = "";
-    rebuildPlayerDropdown(js.added);
-    showToast(`Turn: ${js.added}`);
-  } catch (err) {
-    console.error("Post-add UI update failed:", err);
-    // no toast here; backend already succeeded
-  }
+    // 3) UI update errors shouldn't be misreported as network errors
+    try {
+      players = js.players;
+      newPlayerInput.value = "";
+      rebuildPlayerDropdown(js.added);
+      showToast(`Turn: ${js.added}`);
+    } catch (err) {
+      console.error("Post-add UI update failed:", err);
+      // no toast here; backend already succeeded
+    }
   });
 
   function onWheel(e) {

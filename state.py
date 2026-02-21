@@ -89,6 +89,7 @@ def player_exists(name: str) -> bool:
     n = normalize_player_name(name)
     return any(normalize_player_name(p) == n for p in STATE.players)
 
+
 def _fix_mojibake_filename(name: str) -> str:
     """
     Try to recover UTF-8 filenames that were incorrectly decoded as latin-1.
@@ -110,6 +111,7 @@ def _fix_mojibake_filename(name: str) -> str:
 
     return name
 
+
 def save_upload(file_storage, sub_folder) -> str:
     if not file_storage or file_storage.filename == "":
         raise ValueError("No file selected.")
@@ -123,8 +125,8 @@ def save_upload(file_storage, sub_folder) -> str:
     sanitized_chars = []
 
     for ch in stem:
-    # Allow unicode letters/digits + a small safe set
-    # This keeps Chinese/Japanese/Korean filenames readable.
+        # Allow unicode letters/digits + a small safe set
+        # This keeps Chinese/Japanese/Korean filenames readable.
         if ch.isalnum():
             sanitized_chars.append(ch)
         elif ch in {"-", "_", "(", ")", " ", "."}:
@@ -313,12 +315,15 @@ def _validate_saved_assets(map_filename: str, scene_filename: Optional[str]):
         raise ValueError("Saved round is missing map filename.")
     map_path = os.path.join(UPLOAD_DIR, "maps", os.path.basename(map_filename))
     if not os.path.isfile(map_path):
-        raise ValueError(f"Saved map not found: {os.path.basename(map_filename)}")
+        raise ValueError(
+            f"Saved map not found: {os.path.basename(map_filename)}")
 
     if scene_filename:
-        scene_path = os.path.join(UPLOAD_DIR, "scenes", os.path.basename(scene_filename))
+        scene_path = os.path.join(
+            UPLOAD_DIR, "scenes", os.path.basename(scene_filename))
         if not os.path.isfile(scene_path):
-            raise ValueError(f"Saved scene not found: {os.path.basename(scene_filename)}")
+            raise ValueError(
+                f"Saved scene not found: {os.path.basename(scene_filename)}")
 
 
 def load_saved_round(save_id: str) -> Tuple[Round, List[str]]:
@@ -344,7 +349,8 @@ def load_saved_round(save_id: str) -> Tuple[Round, List[str]]:
         h = 0
     if w <= 0 or h <= 0:
         # attempt to re-read size from disk
-        w, h = get_image_size(os.path.join(UPLOAD_DIR, "maps", os.path.basename(map_filename)))
+        w, h = get_image_size(os.path.join(
+            UPLOAD_DIR, "maps", os.path.basename(map_filename)))
 
     answer = rd_data.get("answer_xy")
     answer_xy = None
@@ -365,7 +371,8 @@ def load_saved_round(save_id: str) -> Tuple[Round, List[str]]:
         id=uuid.uuid4().hex,
         map_filename=os.path.basename(map_filename),
         map_size=(w, h),
-        scene_filename=os.path.basename(scene_filename) if scene_filename else None,
+        scene_filename=os.path.basename(
+            scene_filename) if scene_filename else None,
         answer_xy=answer_xy,
         guesses=guesses,
     )
