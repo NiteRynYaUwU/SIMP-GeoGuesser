@@ -182,11 +182,15 @@ def round_to_dict(rd: Round) -> Dict[str, object]:
 
 
 def round_from_dict(obj: Dict[str, object]) -> Round:
-    map_size = obj.get("map_size") or [0, 0]
+    map_size_raw = obj.get("map_size")
+    if isinstance(map_size_raw, (list, tuple)) and len(map_size_raw) == 2:
+        mx, my = map_size_raw
+    else:
+        mx, my = 0, 0
     rd = Round(
         id=str(obj.get("id") or ""),
         map_filename=str(obj.get("map_filename") or ""),
-        map_size=(int(map_size[0]), int(map_size[1])),
+        map_size=(int(mx), int(my)),
     )
     scene = obj.get("scene_filename")
     rd.scene_filename = scene or None if isinstance(scene, str) else None
