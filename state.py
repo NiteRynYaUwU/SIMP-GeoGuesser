@@ -334,9 +334,14 @@ def load_saved_round(save_id: str) -> Tuple[Round, List[str]]:
     scene_filename = rd_data.get("scene_filename")
     _validate_saved_assets(map_filename, scene_filename)
 
-    map_size = rd_data.get("map_size") or [0, 0]
-    w = _safe_int(map_size[0], 0)
-    h = _safe_int(map_size[1], 0)
+    raw_map_size = rd_data.get("map_size")
+    if isinstance(raw_map_size, (list, tuple)) and len(raw_map_size) >= 2:
+        w = _safe_int(raw_map_size[0], 0)
+        h = _safe_int(raw_map_size[1], 0)
+    else:
+        # invalid or missing map_size; force re-read from disk below
+        w = 0
+        h = 0
     if w <= 0 or h <= 0:
         # attempt to re-read size from disk
         w, h = get_image_size(os.path.join(UPLOAD_DIR, "maps", os.path.basename(map_filename)))
