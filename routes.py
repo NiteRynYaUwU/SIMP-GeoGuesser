@@ -17,6 +17,10 @@ from state import (
     save_map_upload,
     save_scene_upload,
     score_from_distance,
+    save_round_snapshot,
+    list_saved_rounds,
+    load_saved_round,
+    delete_saved_round,
 )
 
 
@@ -194,6 +198,26 @@ def register_routes(app):
                             STATE.current_round_index,
                             len(STATE.rounds) - 1
                         )
+
+                elif action == "save_round":
+                    rid = (request.form.get("round_id") or "").strip()
+                    if not rid:
+                        raise ValueError("Missing round id.")
+                    save_name = (request.form.get("save_name") or "").strip()
+                    save_round_snapshot(rid, save_name or None)
+
+                elif action == "load_saved_round":
+                    sid = (request.form.get("save_id") or "").strip()
+                    if not sid:
+                        raise ValueError("Missing save id.")
+                    load_saved_round(sid)
+
+                elif action == "delete_saved_round":
+                    sid = (request.form.get("save_id") or "").strip()
+                    if not sid:
+                        raise ValueError("Missing save id.")
+                    delete_saved_round(sid)
+
                 else:
                     raise ValueError("Unknown action.")
 
@@ -215,6 +239,7 @@ def register_routes(app):
             round_index=STATE.current_round_index,
             map_library=map_library,
             scene_library=scene_library,
+            saved_rounds=list_saved_rounds(),
         )
 
     @app.route("/set_answer/<round_id>", methods=["GET", "POST"])

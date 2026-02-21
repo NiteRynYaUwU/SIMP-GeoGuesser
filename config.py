@@ -10,3 +10,6 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 ALLOWED_EXT = {".png", ".jpg", ".jpeg", ".webp"}
 
 MAX_CONTENT_LENGTH = 25 * 1024 * 1024  # 25MB
+
+SAVE_DIR = os.path.join(BASE_DIR, ".cache/saves")
+os.makedirs(SAVE_DIR, exist_ok=True)
