@@ -347,7 +347,12 @@ def load_saved_round(save_id: str) -> Tuple[Round, List[str]]:
         w, h = get_image_size(os.path.join(UPLOAD_DIR, "maps", os.path.basename(map_filename)))
 
     answer = rd_data.get("answer_xy")
-    answer_xy = (int(answer[0]), int(answer[1])) if answer else None
+    answer_xy = None
+    if answer:
+        try:
+            answer_xy = (int(answer[0]), int(answer[1]))
+        except Exception:
+            answer_xy = None
 
     guesses = {}
     for p, xy in (rd_data.get("guesses") or {}).items():
