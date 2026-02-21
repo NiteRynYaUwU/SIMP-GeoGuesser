@@ -365,7 +365,7 @@ def load_saved_round(save_id: str) -> Round:
     rd.scene_filename = os.path.basename(rd.scene_filename)
 
     # always give a fresh runtime round id so links don't collide
-    rd.id = uuid.uuid4().hex  # type: ignore[name-defined]
+    rd.id = uuid.uuid4().hex
 
     STATE.rounds.append(rd)
     STATE.current_round_index = len(STATE.rounds) - 1
