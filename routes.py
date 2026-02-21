@@ -12,6 +12,10 @@ from state import (
     get_round,
     list_map_library,
     list_scene_library,
+    list_saved_rounds,
+    save_round_snapshot,
+    load_saved_round,
+    delete_saved_round,
     pixel_distance,
     player_exists,
     save_map_upload,
@@ -155,6 +159,33 @@ def register_routes(app):
                     STATE.rounds.append(rd)
                     STATE.current_round_index = len(STATE.rounds) - 1
 
+                
+                elif action == "save_round":
+                    round_id = (request.form.get("round_id") or "").strip()
+                    if not round_id:
+                        raise ValueError("Missing round id.")
+                    _ = save_round_snapshot(round_id)
+
+                elif action == "load_saved_round":
+                    save_id = (request.form.get("save_id") or "").strip()
+                    if not save_id:
+                        raise ValueError("Choose a saved round.")
+                    new_round, saved_players = load_saved_round(save_id)
+
+                    # merge players (keep existing order, append new ones)
+                    for p in saved_players:
+                        if not player_exists(p):
+                            STATE.players.append(p)
+
+                    STATE.rounds.append(new_round)
+                    STATE.current_round_index = len(STATE.rounds) - 1
+
+                elif action == "delete_saved_round":
+                    save_id = (request.form.get("save_id") or "").strip()
+                    if not save_id:
+                        raise ValueError("Choose a saved round to delete.")
+                    delete_saved_round(save_id)
+
                 elif action == "set_scene":
                     rid = (request.form.get("round_id") or "").strip()
                     if not rid:
@@ -215,6 +246,7 @@ def register_routes(app):
             round_index=STATE.current_round_index,
             map_library=map_library,
             scene_library=scene_library,
+            saved_rounds=list_saved_rounds(),
         )
 
     @app.route("/set_answer/<round_id>", methods=["GET", "POST"])

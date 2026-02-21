@@ -65,6 +65,68 @@
           {% else %}
           <p class="muted" style="margin-top: 10px">No players yet.</p>
           {% endif %}
+
+          <hr
+            style="
+              border: none;
+              height: 1px;
+              background: var(--border);
+              margin: 14px 0;
+            "
+          />
+
+          <div class="tag">Saved Rounds</div>
+          <div class="muted" style="margin-top: 8px">
+            Save a round to reopen it later even after restarting the server.
+          </div>
+
+          <form
+            method="post"
+            class="row"
+            style="margin-top: 12px; flex-wrap: wrap; gap: 10px;"
+          >
+            <input type="hidden" name="action" value="load_saved_round" />
+            <select name="save_id" style="min-width: 260px;">
+              <option value="">
+                {% if saved_rounds %}Choose a saved round{% else %}No saved rounds yet{% endif %}
+              </option>
+              {% for s in saved_rounds %}
+              <option value="{{ s.save_id }}">
+                {{ s.display_name or s.name }}
+                {% if s.map_filename %} · {{ s.map_filename }}{% endif %}
+                {% if s.scene_filename %} · {{ s.scene_filename }}{% endif %}
+              </option>
+              {% endfor %}
+            </select>
+            <button type="submit">Load</button>
+          </form>
+
+          <form
+            method="post"
+            class="row"
+            style="margin-top: 10px; gap: 10px; flex-wrap: wrap;"
+          >
+            <input type="hidden" name="action" value="delete_saved_round" />
+            <select name="save_id" style="min-width: 260px;">
+              <option value="">
+                {% if saved_rounds %}Choose a saved round to delete{% else %}No saved rounds yet{% endif %}
+              </option>
+              {% for s in saved_rounds %}
+              <option value="{{ s.save_id }}">
+                {{ s.display_name or s.name }}
+              </option>
+              {% endfor %}
+            </select>
+            <button
+              class="btn-ghost"
+              type="submit"
+              style="color: var(--bad)"
+              onclick="return confirm('Delete this saved round? This cannot be undone.');"
+            >
+              Delete saved
+            </button>
+          </form>
+
         </div>
 
         <div class="card">
@@ -264,6 +326,12 @@
                       value="{{loop.index0}}"
                     />
                     <button class="btn-ghost" type="submit">Select</button>
+                  </form>
+
+                  <form method="post" style="margin: 0">
+                    <input type="hidden" name="action" value="save_round" />
+                    <input type="hidden" name="round_id" value="{{ rd.id }}" />
+                    <button class="btn-ghost" type="submit">Save</button>
                   </form>
 
                   <form method="post" style="margin: 0">
