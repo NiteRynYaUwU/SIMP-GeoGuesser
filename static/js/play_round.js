@@ -233,31 +233,53 @@
   });
 
   addPlayerForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const name = (newPlayerInput.value || "").trim();
-    if (!name) {
-      showToast("Name cannot be empty.", true);
-      return;
-    }
-    try {
-      const res = await fetch("/api/add_player", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
-      });
-      const js = await res.json();
-      if (!res.ok || !js.ok) {
-        showToast(js.error || "Failed to add.", true);
-        return;
-      }
-      players = js.players;
-      newPlayerInput.value = "";
-      rebuildPlayerDropdown(js.added);
-      showToast(`Turn: ${js.added}`);
-    } catch (err) {
-      console.error(err);
-      showToast("Network error", true);
-    }
+  e.preventDefault();
+  const name = (newPlayerInput.value || "").trim();
+  if (!name) {
+    showToast("Name cannot be empty.", true);
+    return;
+  }
+
+  // 1) Only treat actual fetch failures as "Network error"
+  let res;
+  try {
+    res = await fetch("/api/add_player", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
+    });
+  } catch (err) {
+    console.error(err);
+    showToast("Network error", true);
+    return;
+  }
+
+  // 2) Try to parse JSON, but don't mislabel parse/HTML errors as network errors
+  let js = null;
+  try {
+    js = await res.json();
+  } catch (err) {
+    console.error("Failed to parse JSON from /api/add_player:", err);
+  }
+
+  if (!res.ok || !js || !js.ok) {
+    const msg =
+      (js && js.error) ||
+      `Failed to add (HTTP ${res.status})`;
+    showToast(msg, true);
+    return;
+  }
+
+  // 3) UI updates: if something here throws, don't show "Network error"
+  try {
+    players = js.players;
+    newPlayerInput.value = "";
+    rebuildPlayerDropdown(js.added);
+    showToast(`Turn: ${js.added}`);
+  } catch (err) {
+    console.error("Post-add UI update failed:", err);
+    // no toast: player was added successfully server-side
+  }
   });
 
   function onWheel(e) {
