@@ -7,9 +7,6 @@
   const previewWrap = document.getElementById("hostPreviewWrap");
   const previewViewport = document.getElementById("hostPreviewViewport");
   const previewReset = document.getElementById("hostPreviewReset");
-  const deleteSavedRoundButton = document.querySelector(
-    '[id="deleteSavedRoundButton"]',
-  );
   const pz =
     createPanZoom && previewWrap && previewViewport
       ? createPanZoom(previewWrap, previewViewport)
@@ -18,29 +15,6 @@
   previewReset?.addEventListener("click", () => pz?.reset());
   previewReset?.addEventListener("pointerdown", (e) => e.stopPropagation());
   previewReset?.addEventListener("wheel", (e) => e.stopPropagation());
-
-  function onDeleteSavedRoundClick(e) {
-    const form = e.currentTarget.closest("form");
-    const select = form?.querySelector('select[name="save_id"]');
-    if (!select?.value) {
-      e.preventDefault();
-      alert("Please select a saved round first.");
-      return;
-    }
-
-    const actionInput = form.querySelector('input[name="action"]');
-    if (actionInput) actionInput.value = "delete_saved_round";
-
-    const shouldDelete = confirm(
-      "Delete this saved round? This cannot be undone.",
-    );
-    if (!shouldDelete) {
-      e.preventDefault();
-      if (actionInput) actionInput.value = "load_saved_round";
-    }
-  }
-
-  deleteSavedRoundButton?.addEventListener("click", onDeleteSavedRoundClick);
 
   function getGuesses() {
     const el = document.getElementById("hostGuessesJson");

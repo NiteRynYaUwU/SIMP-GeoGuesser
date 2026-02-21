@@ -85,7 +85,6 @@
             class="row"
             style="margin-top: 12px; flex-wrap: wrap; gap: 10px"
           >
-            <input type="hidden" name="action" value="load_saved_round" />
             <select name="save_id" style="min-width: 260px">
               <option value="">
                 {% if saved_rounds %}Choose a saved round{% else %}No saved
@@ -99,12 +98,13 @@
               </option>
               {% endfor %}
             </select>
+            <input type="hidden" name="action" value="load_saved_round" />
             <button type="submit">Load</button>
+            <input type="hidden" name="action" value="delete_saved_round" />
             <button
               class="btn-ghost"
               type="submit"
               style="color: var(--bad)"
-              id="deleteSavedRoundButton"
             >
               Delete saved
             </button>
