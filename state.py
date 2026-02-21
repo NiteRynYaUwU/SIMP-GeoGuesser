@@ -188,7 +188,8 @@ def round_from_dict(obj: Dict[str, object]) -> Round:
         map_filename=str(obj.get("map_filename") or ""),
         map_size=(int(map_size[0]), int(map_size[1])),
     )
-    rd.scene_filename = obj.get("scene_filename") or None
+    scene = obj.get("scene_filename")
+    rd.scene_filename = scene or None if isinstance(scene, str) else None
 
     ans = obj.get("answer_xy")
     if ans and isinstance(ans, (list, tuple)) and len(ans) == 2:
