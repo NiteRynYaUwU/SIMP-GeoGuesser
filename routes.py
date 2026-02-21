@@ -159,7 +159,6 @@ def register_routes(app):
                     STATE.rounds.append(rd)
                     STATE.current_round_index = len(STATE.rounds) - 1
 
-                
                 elif action == "save_round":
                     round_id = (request.form.get("round_id") or "").strip()
                     if not round_id:
