@@ -239,7 +239,7 @@ def save_round_snapshot(round_id: str, name: Optional[str] = None) -> str:
     Returns the save_id.
     """
     rd = get_round(round_id)
-    save_id = uuid.uuid4().hex  # type: ignore[name-defined]
+    save_id = uuid.uuid4().hex
 
     # Determine which round number this is (1-based) and allocate a version.
     round_num = (STATE.rounds.index(rd) + 1) if rd in STATE.rounds else 0
