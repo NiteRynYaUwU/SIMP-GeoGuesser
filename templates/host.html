@@ -100,34 +100,11 @@
               {% endfor %}
             </select>
             <button type="submit">Load</button>
-          </form>
-
-          <form
-            method="post"
-            class="row"
-            style="margin-top: 10px; gap: 10px; flex-wrap: wrap"
-          >
-            <input type="hidden" name="action" value="delete_saved_round" />
-            <select name="save_id" style="min-width: 260px">
-              <option value="">
-                {% if saved_rounds %}Choose a saved round to delete{% else %}No
-                saved rounds yet{% endif %}
-              </option>
-              {% for s in saved_rounds %}
-              <option value="{{ s.save_id }}">
-                {{ s.display_name or s.name }}
-              </option>
-              {% endfor %}
-            </select>
             <button
               class="btn-ghost"
               type="submit"
               style="color: var(--bad)"
-              onclick="
-                return confirm(
-                  'Delete this saved round? This cannot be undone.',
-                );
-              "
+              id="deleteSavedRoundButton"
             >
               Delete saved
             </button>
