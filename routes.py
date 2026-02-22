@@ -12,6 +12,10 @@ from state import (
     get_round,
     list_map_library,
     list_scene_library,
+    list_saved_rounds,
+    save_round_snapshot,
+    load_saved_round,
+    delete_saved_round,
     pixel_distance,
     player_exists,
     save_map_upload,
@@ -98,18 +102,21 @@ def register_routes(app):
                             rd.guesses.pop(name, None)
 
                 elif action == "add_round":
-                    existing_map = (request.form.get("existing_map") or "").strip()
+                    existing_map = (request.form.get(
+                        "existing_map") or "").strip()
 
                     if existing_map:
                         candidate = os.path.basename(existing_map)
                         path = os.path.join(UPLOAD_DIR, "maps", candidate)
                         if not ext_ok(candidate) or not os.path.isfile(path):
-                            raise ValueError("Selected map is not available anymore.")
+                            raise ValueError(
+                                "Selected map is not available anymore.")
                         filename = candidate
                         try:
                             w, h = get_image_size(path)
                         except Exception:
-                            raise ValueError("The selected image file appears to be corrupted or invalid.")
+                            raise ValueError(
+                                "The selected image file appears to be corrupted or invalid.")
                     else:
                         map_file = request.files.get("map_image")
                         filename = save_map_upload(map_file)
@@ -117,7 +124,8 @@ def register_routes(app):
                         try:
                             w, h = get_image_size(path)
                         except Exception:
-                            raise ValueError("The selected image file appears to be corrupted or invalid.")
+                            raise ValueError(
+                                "The selected image file appears to be corrupted or invalid.")
 
                     rd = Round(
                         id=uuid.uuid4().hex,
@@ -126,34 +134,66 @@ def register_routes(app):
                     )
 
                     # ---- Scene logic ----
-                    existing_scene = (request.form.get("existing_scene") or "").strip()
+                    existing_scene = (request.form.get(
+                        "existing_scene") or "").strip()
 
                     if existing_scene:
                         candidate = os.path.basename(existing_scene)
                         path = os.path.join(UPLOAD_DIR, "scenes", candidate)
                         if not ext_ok(candidate) or not os.path.isfile(path):
-                            raise ValueError("Selected scene is not available anymore.")
+                            raise ValueError(
+                                "Selected scene is not available anymore.")
                         try:
                             _ = get_image_size(path)
                         except Exception:
-                            raise ValueError("The selected scene image file appears to be corrupted or invalid.")
+                            raise ValueError(
+                                "The selected scene image file appears to be corrupted or invalid.")
                         rd.scene_filename = candidate
                     else:
                         scene_file = request.files.get("scene_image")
                         if scene_file and scene_file.filename:
                             filename_scene = save_scene_upload(scene_file)
-                            path_scene = os.path.join(UPLOAD_DIR, "scenes", filename_scene)
+                            path_scene = os.path.join(
+                                UPLOAD_DIR, "scenes", filename_scene)
                             try:
                                 _ = get_image_size(path_scene)
                             except Exception:
-                                raise ValueError("The selected scene image file appears to be corrupted or invalid.")
+                                raise ValueError(
+                                    "The selected scene image file appears to be corrupted or invalid.")
                             rd.scene_filename = filename_scene
 
                     if not rd.scene_filename:
-                        raise ValueError("Scene image is required. Upload one or reuse an existing scene.")
+                        raise ValueError(
+                            "Scene image is required. Upload one or reuse an existing scene.")
 
                     STATE.rounds.append(rd)
                     STATE.current_round_index = len(STATE.rounds) - 1
+
+                elif action == "save_round":
+                    round_id = (request.form.get("round_id") or "").strip()
+                    if not round_id:
+                        raise ValueError("Missing round id.")
+                    _ = save_round_snapshot(round_id)
+
+                elif action == "load_saved_round":
+                    save_id = (request.form.get("save_id") or "").strip()
+                    if not save_id:
+                        raise ValueError("Choose a saved round.")
+                    new_round, saved_players = load_saved_round(save_id)
+
+                    # merge players (keep existing order, append new ones)
+                    for p in saved_players:
+                        if not player_exists(p):
+                            STATE.players.append(p)
+
+                    STATE.rounds.append(new_round)
+                    STATE.current_round_index = len(STATE.rounds) - 1
+
+                elif action == "delete_saved_round":
+                    save_id = (request.form.get("save_id") or "").strip()
+                    if not save_id:
+                        raise ValueError("Choose a saved round to delete.")
+                    delete_saved_round(save_id)
 
                 elif action == "set_scene":
                     rid = (request.form.get("round_id") or "").strip()
@@ -181,7 +221,8 @@ def register_routes(app):
                     if not round_id:
                         raise ValueError("Missing round id.")
 
-                    idx = next((i for i, r in enumerate(STATE.rounds) if r.id == round_id), None)
+                    idx = next((i for i, r in enumerate(
+                        STATE.rounds) if r.id == round_id), None)
                     if idx is None:
                         raise ValueError("Round not found.")
 
@@ -215,6 +256,7 @@ def register_routes(app):
             round_index=STATE.current_round_index,
             map_library=map_library,
             scene_library=scene_library,
+            saved_rounds=list_saved_rounds(),
         )
 
     @app.route("/set_answer/<round_id>", methods=["GET", "POST"])

@@ -63,7 +63,6 @@
       const cx = clamp(Math.round(x * sx), 0, w);
       const cy = clamp(Math.round(y * sy), 0, h);
 
-      // ✅ per-player deterministic random color
       makePin(svg, cx, cy, playerColor(name), name);
     }
 
