@@ -101,11 +101,7 @@
             <input type="hidden" name="action" value="load_saved_round" />
             <button type="submit">Load</button>
             <input type="hidden" name="action" value="delete_saved_round" />
-            <button
-              class="btn-ghost"
-              type="submit"
-              style="color: var(--bad)"
-            >
+            <button class="btn-ghost" type="submit" style="color: var(--bad)">
               Delete saved
             </button>
           </form>
@@ -307,7 +303,17 @@
                       name="round_index"
                       value="{{loop.index0}}"
                     />
+                    {% if current and current.id == rd.id %}
+                    <button
+                      class="btn-ghost"
+                      type="submit"
+                      style="color: var(--muted)"
+                    >
+                      Selected
+                    </button>
+                    {% else %}
                     <button class="btn-ghost" type="submit">Select</button>
+                    {% endif %}
                   </form>
 
                   <form method="post" style="margin: 0">
