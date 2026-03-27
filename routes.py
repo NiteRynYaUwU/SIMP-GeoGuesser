@@ -74,7 +74,7 @@ def register_routes(app):
         guesses = {p: {"x": xy[0], "y": xy[1]} for p, xy in rd.guesses.items()}
         return jsonify({"ok": True, "players": STATE.players, "guesses": guesses})
 
-    @app.route("/")
+    @app.route("/", methods=["GET", "POST"])
     def home():
         return redirect(url_for("host"))
 
