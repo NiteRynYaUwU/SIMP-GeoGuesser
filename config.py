@@ -13,3 +13,4 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 ALLOWED_EXT = {".png", ".jpg", ".jpeg", ".webp"}
 
 MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB
+
